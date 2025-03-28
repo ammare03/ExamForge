@@ -53,5 +53,5 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.material.v160)
-
+    implementation(libs.tom.roush.pdfbox.android)
 }

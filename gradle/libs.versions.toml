@@ -16,6 +16,7 @@ credentialsPlayServicesAuth = "1.5.0"
 googleid = "1.1.1"
 materialVersion = "1.6.0"
 pdfboxAndroid = "2.0.27.0"
+pdfboxAndroidVersion = "2.0.27.0"
 retrofit = "2.9.0"
 roomRuntime = "2.6.1"
 
@@ -39,6 +40,7 @@ pdfbox-android = { module = "com.tom-roush:pdfbox-android", version.ref = "pdfbo
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+tom_roush-pdfbox-android = { module = "com.tom_roush:pdfbox-android", version.ref = "pdfboxAndroidVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
