@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "355907787981",
+    "project_id": "examforge-dab59",
+    "storage_bucket": "examforge-dab59.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:355907787981:android:d075fa51420c4c374b5d84",
+        "android_client_info": {
+          "package_name": "com.example.examforge"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcHSJCgtat0p6YS-bmlc--tbRSDLfKi-g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
