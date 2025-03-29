@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -13,8 +14,11 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.examforge.R;
+import com.example.examforge.repository.QuestionPaperRepository;
+import com.example.examforge.utils.PDFGenerator;
 import com.tom_roush.pdfbox.pdmodel.PDDocument;
 import com.tom_roush.pdfbox.text.PDFTextStripper;
+import java.io.File;
 import java.io.InputStream;
 
 public class CreateQuestionPaperActivity extends AppCompatActivity {
@@ -40,10 +44,17 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
         etAdditionalParams = findViewById(R.id.etAdditionalParams);
         spinnerQuestionType = findViewById(R.id.spinnerQuestionType);
 
+        // Populate spinner with sample question types
+        String[] questionTypes = {"MCQ", "Subjective", "Mixed"};
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, questionTypes);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerQuestionType.setAdapter(spinnerAdapter);
+
         // Set up click listener to open PDF chooser
         btnChoosePDF.setOnClickListener(v -> openFileChooser());
 
-        // Handle submission: validate inputs, then trigger API call (to be implemented)
+        // Handle submission: validate inputs and trigger API call
         btnSubmit.setOnClickListener(v -> {
             if (pdfUri == null) {
                 Toast.makeText(this, "Please select a PDF file", Toast.LENGTH_SHORT).show();
@@ -54,11 +65,43 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
                 Toast.makeText(this, "Enter total marks", Toast.LENGTH_SHORT).show();
                 return;
             }
-            // Collect additional parameters and the question type from the spinner if needed.
-            // At this point, the extractedText (from the PDF) is available.
+            String additionalParams = etAdditionalParams.getText().toString().trim();
+            Object selectedItem = spinnerQuestionType.getSelectedItem();
+            if (selectedItem == null) {
+                Toast.makeText(this, "Please select a question type", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String questionType = selectedItem.toString();
+
             Toast.makeText(this, "Generating question paper...", Toast.LENGTH_SHORT).show();
 
-            // TODO: Use the extractedText, marks, spinner selection, and additional parameters to call your generative AI API.
+            new QuestionPaperRepository().generateQuestionPaper(
+                    extractedText, marks, questionType, additionalParams,
+                    new QuestionPaperRepository.GenerationCallback() {
+                        @Override
+                        public void onSuccess(String generatedText) {
+                            runOnUiThread(() -> {
+                                try {
+                                    File pdfFile = PDFGenerator.generatePDF(CreateQuestionPaperActivity.this,
+                                            generatedText, "GeneratedQuestionPaper.pdf");
+                                    // Navigate to PreviewActivity, passing the PDF file path
+                                    Intent intent = new Intent(CreateQuestionPaperActivity.this, PreviewActivity.class);
+                                    intent.putExtra("pdfFilePath", pdfFile.getAbsolutePath());
+                                    startActivity(intent);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    Toast.makeText(CreateQuestionPaperActivity.this,
+                                            "Error generating PDF", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                        @Override
+                        public void onFailure(String error) {
+                            runOnUiThread(() ->
+                                    Toast.makeText(CreateQuestionPaperActivity.this,
+                                            "API Error: " + error, Toast.LENGTH_SHORT).show());
+                        }
+                    });
         });
     }
 

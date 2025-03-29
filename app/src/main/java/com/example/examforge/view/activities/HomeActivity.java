@@ -1,5 +1,6 @@
 package com.example.examforge.view.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,10 +9,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.examforge.R;
+import com.example.examforge.model.QuestionPaper;
+import com.example.examforge.repository.QuestionPaperHistoryRepository;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -22,7 +26,7 @@ public class HomeActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private FloatingActionButton fabAdd;
     private QuestionPaperAdapter adapter;
-    private List<String> questionPaperList;
+    private QuestionPaperHistoryRepository historyRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,29 +36,37 @@ public class HomeActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         fabAdd = findViewById(R.id.fabAdd);
 
-        // For demonstration, we are using dummy data.
-        questionPaperList = new ArrayList<>();
-        questionPaperList.add("Maths - Algebra Questions");
-        questionPaperList.add("Physics - Mechanics Questions");
-        questionPaperList.add("Chemistry - Organic Chemistry Questions");
-
-        adapter = new QuestionPaperAdapter(questionPaperList);
+        adapter = new QuestionPaperAdapter(new ArrayList<>());
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
+        historyRepository = new QuestionPaperHistoryRepository(this);
+        // Observe changes in the database
+        historyRepository.getAllQuestionPapers().observe(this, new Observer<List<QuestionPaper>>() {
+            @Override
+            public void onChanged(List<QuestionPaper> questionPapers) {
+                adapter.setData(questionPapers);
+            }
+        });
+
         fabAdd.setOnClickListener(v -> {
-            Toast.makeText(HomeActivity.this, "Create new Question Paper", Toast.LENGTH_SHORT).show();
-            // TODO: Redirect to the PDF upload and parameters screen.
+            // Navigate to the PDF upload and parameter screen
+            startActivity(new Intent(HomeActivity.this, CreateQuestionPaperActivity.class));
         });
     }
 
-    // Inner Adapter class for RecyclerView
+    // Adapter for RecyclerView
     private class QuestionPaperAdapter extends RecyclerView.Adapter<QuestionPaperAdapter.PaperViewHolder> {
 
-        private List<String> paperList;
+        private List<QuestionPaper> paperList;
 
-        public QuestionPaperAdapter(List<String> paperList) {
+        public QuestionPaperAdapter(List<QuestionPaper> paperList) {
             this.paperList = paperList;
+        }
+
+        public void setData(List<QuestionPaper> papers) {
+            this.paperList = papers;
+            notifyDataSetChanged();
         }
 
         @Override
@@ -66,25 +78,27 @@ public class HomeActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(PaperViewHolder holder, int position) {
-            String title = paperList.get(position);
-            holder.bind(title);
+            QuestionPaper paper = paperList.get(position);
+            holder.tvPaperTitle.setText(paper.getTitle());
+            // Allow deletion on long press
+            holder.itemView.setOnLongClickListener(v -> {
+                historyRepository.delete(paper);
+                Toast.makeText(HomeActivity.this, "Question paper deleted", Toast.LENGTH_SHORT).show();
+                return true;
+            });
+            // Optionally, you can add a click listener to view the PDF using PreviewActivity.
         }
 
         @Override
         public int getItemCount() {
-            return paperList.size();
+            return paperList == null ? 0 : paperList.size();
         }
 
         class PaperViewHolder extends RecyclerView.ViewHolder {
-            private TextView tvPaperTitle;
-
+            TextView tvPaperTitle;
             public PaperViewHolder(View itemView) {
                 super(itemView);
                 tvPaperTitle = itemView.findViewById(R.id.tvPaperTitle);
-            }
-
-            public void bind(String title) {
-                tvPaperTitle.setText(title);
             }
         }
     }
