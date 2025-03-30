@@ -78,12 +78,10 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
 
             Toast.makeText(CreateQuestionPaperActivity.this, "Generating question paper...", Toast.LENGTH_SHORT).show();
 
-            // Initialize ChatGPTManager
+            // Initialize ChatGPTManager and generate question paper by sending the extracted text in chunks.
             ChatGPTManager chatGPTManager = new ChatGPTManager();
-            // You may optionally add an initial system prompt to guide generation if desired.
-            // For each chunk of the extracted text, the conversation history is maintained.
-            // Here, we use a chunk size of 1000 characters (adjust as needed)
-            chatGPTManager.generateQuestionPaper(extractedText, 1000, new ChatGPTManager.ChatGPTCallback() {
+            // Using chunk size of 1000 characters; adjust as needed.
+            chatGPTManager.generateQuestionPaper(extractedText, 1000, marks, questionType, additionalParams, new ChatGPTManager.ChatGPTCallback() {
                 @Override
                 public void onComplete(String combinedResponse) {
                     // Combine total marks with generated questions.

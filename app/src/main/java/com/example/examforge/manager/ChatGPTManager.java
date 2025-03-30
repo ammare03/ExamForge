@@ -19,62 +19,72 @@ public class ChatGPTManager {
     private ChatGPTApiService apiService;
     private List<ChatMessage> conversationHistory;
 
-    public ChatGPTManager() {
-        apiService = ChatGPTRetrofitClient.getClient().create(ChatGPTApiService.class);
-        conversationHistory = new ArrayList<>();
-    }
-
     public interface ChatGPTCallback {
         void onComplete(String combinedResponse);
         void onError(String error);
     }
 
-    // Adds a user message to the conversation history.
+    public ChatGPTManager() {
+        apiService = ChatGPTRetrofitClient.getClient().create(ChatGPTApiService.class);
+        conversationHistory = new ArrayList<>();
+    }
+
+    // Helper methods to add messages to conversation history.
     public void addUserMessage(String content) {
         conversationHistory.add(new ChatMessage("user", content));
     }
 
-    // Adds an assistant message to the conversation history.
     public void addAssistantMessage(String content) {
         conversationHistory.add(new ChatMessage("assistant", content));
     }
 
     /**
-     * Splits the extracted text into chunks, sends each chunk to the ChatGPT API while maintaining conversation history,
-     * and returns the combined generated output via the callback.
+     * Splits the extracted text into chunks and sends each chunk to the ChatGPT API with the desired prompt format.
+     * The prompt for each chunk is built as:
+     * "Create a question paper with the following content <chunk> that has <marks> marks, is of <questionType> type
+     * and has these as the additional parameters: <additionalParams>"
      *
-     * @param extractedText The complete text extracted from the PDF.
-     * @param chunkSize     The maximum number of characters per chunk.
-     * @param callback      Callback to deliver the combined generated text.
+     * @param extractedText   The complete text extracted from the PDF.
+     * @param chunkSize       The maximum number of characters per chunk.
+     * @param marks           The total marks provided by the user.
+     * @param questionType    The selected question type.
+     * @param additionalParams Additional parameters entered by the user.
+     * @param callback        Callback to deliver the combined generated text.
      */
-    public void generateQuestionPaper(String extractedText, int chunkSize, ChatGPTCallback callback) {
+    public void generateQuestionPaper(String extractedText, int chunkSize, String marks, String questionType, String additionalParams, ChatGPTCallback callback) {
         List<String> chunks = splitText(extractedText, chunkSize);
         List<String> responses = new ArrayList<>();
-        processChunk(chunks, 0, responses, callback);
+        processChunk(chunks, 0, responses, marks, questionType, additionalParams, callback);
     }
 
-    // Recursively process each chunk.
-    private void processChunk(List<String> chunks, int index, List<String> responses, ChatGPTCallback callback) {
+    // Recursively processes each chunk using the desired prompt format.
+    private void processChunk(List<String> chunks, int index, List<String> responses, String marks, String questionType, String additionalParams, ChatGPTCallback callback) {
         if (index >= chunks.size()) {
             StringBuilder combined = new StringBuilder();
             for (String resp : responses) {
                 combined.append(resp).append("\n\n");
             }
             callback.onComplete(combined.toString());
+            // Clear conversation history after generation.
             conversationHistory.clear();
             return;
         }
 
-        // Log the current chunk to Logcat.
+        // Get the current chunk.
         String currentChunk = chunks.get(index);
-        Log.d(TAG, "Processing chunk " + index + ": " + currentChunk);
+        // Build the prompt with the additional parameters.
+        String prompt = "Create a question paper with the following content " + currentChunk +
+                " that has " + marks + " marks, is of " + questionType + " type and has these as the additional parameters: " + additionalParams;
 
-        // Add current chunk as a user message.
-        addUserMessage(currentChunk);
+        // Log the prompt for debugging.
+        Log.d(TAG, "Processing chunk " + index + " with prompt: " + prompt);
 
-        // Build the request with the entire conversation history.
+        // Add this prompt as a user message to the conversation history.
+        addUserMessage(prompt);
+
+        // Build the ChatGPTRequest using the full conversation history.
         ChatGPTRequest request = new ChatGPTRequest(
-                "gpt-4o-mini", // or "gpt-4" if available
+                "gpt-4o-mini", // You can change this to "gpt-4" if needed.
                 new ArrayList<>(conversationHistory),
                 300,   // max_tokens
                 0.7    // temperature
@@ -87,9 +97,11 @@ public class ChatGPTManager {
                         response.body().getChoices() != null &&
                         !response.body().getChoices().isEmpty()) {
                     String generated = response.body().getChoices().get(0).getMessage().getContent();
+                    // Append assistant's response to conversation history.
                     addAssistantMessage(generated);
                     responses.add(generated);
-                    processChunk(chunks, index + 1, responses, callback);
+                    // Process the next chunk.
+                    processChunk(chunks, index + 1, responses, marks, questionType, additionalParams, callback);
                 } else {
                     String errorMsg = "Error on chunk " + index + ": " + response.message();
                     try {
