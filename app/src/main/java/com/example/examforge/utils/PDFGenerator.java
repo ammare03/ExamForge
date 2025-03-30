@@ -14,8 +14,12 @@ public class PDFGenerator {
 
     public static File generatePDF(Context context, String content, String fileName) throws DocumentException, IOException {
         Document document = new Document();
-        // Save the PDF in the app's external documents directory
-        File pdfFile = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), fileName);
+        // Get the public Documents directory.
+        File documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+        if (!documentsDir.exists()) {
+            documentsDir.mkdirs();
+        }
+        File pdfFile = new File(documentsDir, fileName);
         PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
         document.open();
         document.add(new Paragraph(content));

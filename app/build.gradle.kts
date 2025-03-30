@@ -6,6 +6,9 @@ plugins {
 android {
     namespace = "com.example.examforge"
     compileSdk = 35
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
         applicationId = "com.example.examforge"
@@ -15,6 +18,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val apiKey: String = project.findProperty("chatGptApiKey") as String? ?: ""
+        buildConfigField("String", "CHATGPT_API_KEY", "\"${apiKey}\"")
     }
 
     buildTypes {

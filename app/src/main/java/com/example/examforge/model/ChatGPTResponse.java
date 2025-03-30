@@ -2,7 +2,7 @@ package com.example.examforge.model;
 
 import java.util.List;
 
-public class ChatCompletionResponse {
+public class ChatGPTResponse {
     private List<Choice> choices;
 
     public List<Choice> getChoices() {
@@ -14,13 +14,13 @@ public class ChatCompletionResponse {
     }
 
     public static class Choice {
-        private Message message;
+        private ChatMessage message;
 
-        public Message getMessage() {
+        public ChatMessage getMessage() {
             return message;
         }
 
-        public void setMessage(Message message) {
+        public void setMessage(ChatMessage message) {
             this.message = message;
         }
     }

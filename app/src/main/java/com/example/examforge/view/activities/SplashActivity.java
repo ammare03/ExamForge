@@ -9,7 +9,6 @@ import android.view.animation.AnimationUtils;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.examforge.R;
 import com.google.firebase.auth.FirebaseAuth;
-import com.tom_roush.pdfbox.android.PDFBoxResourceLoader;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -21,8 +20,6 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-
-        PDFBoxResourceLoader.init(getApplicationContext());
 
         ivLogo = findViewById(R.id.ivLogo);
         progressBar = findViewById(R.id.progressBar);

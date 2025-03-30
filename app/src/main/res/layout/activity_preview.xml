@@ -9,7 +9,7 @@
         android:id="@+id/tvPreviewLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Question Paper Generated!"
+        android:text="Your Question Paper is Ready!"
         android:textSize="20sp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"

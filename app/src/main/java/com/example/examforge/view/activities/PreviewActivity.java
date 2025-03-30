@@ -26,12 +26,13 @@ public class PreviewActivity extends AppCompatActivity {
             File pdfFile = new File(pdfFilePath);
             if (pdfFile.exists()) {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
+                // For Android 7.0 and above, consider using FileProvider.
                 intent.setDataAndType(Uri.fromFile(pdfFile), "application/pdf");
                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 try {
                     startActivity(intent);
                 } catch (Exception e) {
-                    Toast.makeText(PreviewActivity.this, "No PDF Viewer found", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PreviewActivity.this, "No PDF viewer found", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 Toast.makeText(PreviewActivity.this, "PDF file not found", Toast.LENGTH_SHORT).show();

@@ -14,8 +14,9 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.examforge.R;
-import com.example.examforge.repository.QuestionPaperRepository;
+import com.example.examforge.manager.ChatGPTManager;
 import com.example.examforge.utils.PDFGenerator;
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader;
 import com.tom_roush.pdfbox.pdmodel.PDDocument;
 import com.tom_roush.pdfbox.text.PDFTextStripper;
 import java.io.File;
@@ -34,6 +35,8 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Initialize PDFBox resources
+        PDFBoxResourceLoader.init(getApplicationContext());
         setContentView(R.layout.activity_create_question_paper);
 
         // Initialize views
@@ -51,57 +54,61 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerQuestionType.setAdapter(spinnerAdapter);
 
-        // Set up click listener to open PDF chooser
+        // Set up PDF chooser
         btnChoosePDF.setOnClickListener(v -> openFileChooser());
 
-        // Handle submission: validate inputs and trigger API call
+        // Handle submission: validate inputs and generate question paper using ChatGPTManager.
         btnSubmit.setOnClickListener(v -> {
             if (pdfUri == null) {
-                Toast.makeText(this, "Please select a PDF file", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CreateQuestionPaperActivity.this, "Please select a PDF file", Toast.LENGTH_SHORT).show();
                 return;
             }
             String marks = etMarks.getText().toString().trim();
             if (marks.isEmpty()) {
-                Toast.makeText(this, "Enter total marks", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CreateQuestionPaperActivity.this, "Enter total marks", Toast.LENGTH_SHORT).show();
                 return;
             }
             String additionalParams = etAdditionalParams.getText().toString().trim();
             Object selectedItem = spinnerQuestionType.getSelectedItem();
             if (selectedItem == null) {
-                Toast.makeText(this, "Please select a question type", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CreateQuestionPaperActivity.this, "Please select a question type", Toast.LENGTH_SHORT).show();
                 return;
             }
             String questionType = selectedItem.toString();
 
-            Toast.makeText(this, "Generating question paper...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(CreateQuestionPaperActivity.this, "Generating question paper...", Toast.LENGTH_SHORT).show();
 
-            new QuestionPaperRepository().generateQuestionPaper(
-                    extractedText, marks, questionType, additionalParams,
-                    new QuestionPaperRepository.GenerationCallback() {
-                        @Override
-                        public void onSuccess(String generatedText) {
-                            runOnUiThread(() -> {
-                                try {
-                                    File pdfFile = PDFGenerator.generatePDF(CreateQuestionPaperActivity.this,
-                                            generatedText, "GeneratedQuestionPaper.pdf");
-                                    // Navigate to PreviewActivity, passing the PDF file path
-                                    Intent intent = new Intent(CreateQuestionPaperActivity.this, PreviewActivity.class);
-                                    intent.putExtra("pdfFilePath", pdfFile.getAbsolutePath());
-                                    startActivity(intent);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    Toast.makeText(CreateQuestionPaperActivity.this,
-                                            "Error generating PDF", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                        @Override
-                        public void onFailure(String error) {
-                            runOnUiThread(() ->
-                                    Toast.makeText(CreateQuestionPaperActivity.this,
-                                            "API Error: " + error, Toast.LENGTH_SHORT).show());
+            // Initialize ChatGPTManager
+            ChatGPTManager chatGPTManager = new ChatGPTManager();
+            // You may optionally add an initial system prompt to guide generation if desired.
+            // For each chunk of the extracted text, the conversation history is maintained.
+            // Here, we use a chunk size of 1000 characters (adjust as needed)
+            chatGPTManager.generateQuestionPaper(extractedText, 1000, new ChatGPTManager.ChatGPTCallback() {
+                @Override
+                public void onComplete(String combinedResponse) {
+                    // Combine total marks with generated questions.
+                    String finalOutput = "Total Marks: " + marks + "\n\n" + combinedResponse;
+                    runOnUiThread(() -> {
+                        try {
+                            File pdfFile = PDFGenerator.generatePDF(CreateQuestionPaperActivity.this,
+                                    finalOutput, "GeneratedQuestionPaper.pdf");
+                            // Navigate to PreviewActivity with the PDF file path.
+                            Intent intent = new Intent(CreateQuestionPaperActivity.this, PreviewActivity.class);
+                            intent.putExtra("pdfFilePath", pdfFile.getAbsolutePath());
+                            startActivity(intent);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(CreateQuestionPaperActivity.this, "Error generating PDF", Toast.LENGTH_SHORT).show();
                         }
                     });
+                }
+
+                @Override
+                public void onError(String error) {
+                    runOnUiThread(() ->
+                            Toast.makeText(CreateQuestionPaperActivity.this, "API Error: " + error, Toast.LENGTH_LONG).show());
+                }
+            });
         });
     }
 
@@ -122,7 +129,7 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
         }
     }
 
-    // Helper method to retrieve the file name from the Uri
+    // Helper method to retrieve file name from Uri.
     private String getFileName(Uri uri) {
         String result = "Selected File";
         Cursor cursor = getContentResolver().query(uri, null, null, null, null);
@@ -139,7 +146,7 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
         return result;
     }
 
-    // Method to extract text from the selected PDF using PdfBox-Android
+    // Method to extract text from PDF using PdfBox-Android.
     private void extractTextFromPDF(Uri uri) {
         try {
             InputStream inputStream = getContentResolver().openInputStream(uri);
