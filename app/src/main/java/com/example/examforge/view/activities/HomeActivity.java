@@ -98,6 +98,7 @@ public class HomeActivity extends AppCompatActivity {
             return paperList == null ? 0 : paperList.size();
         }
 
+        // Test comment
         class PaperViewHolder extends RecyclerView.ViewHolder {
             TextView tvPaperTitle, tvPaperDate;
 
