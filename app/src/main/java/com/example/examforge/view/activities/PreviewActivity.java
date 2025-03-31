@@ -6,12 +6,13 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import com.example.examforge.R;
 import java.io.File;
 
 public class PreviewActivity extends AppCompatActivity {
 
-    private Button btnViewPDF;
+    private Button btnViewPDF, btnBackToHistory;
     private String pdfFilePath;
 
     @Override
@@ -20,15 +21,20 @@ public class PreviewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_preview);
 
         btnViewPDF = findViewById(R.id.btnViewPDF);
+        btnBackToHistory = findViewById(R.id.btnBackToHistory);
         pdfFilePath = getIntent().getStringExtra("pdfFilePath");
 
         btnViewPDF.setOnClickListener(v -> {
             File pdfFile = new File(pdfFilePath);
             if (pdfFile.exists()) {
+                Uri contentUri = FileProvider.getUriForFile(
+                        PreviewActivity.this,
+                        getPackageName() + ".provider",
+                        pdfFile
+                );
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                // For Android 7.0 and above, consider using FileProvider.
-                intent.setDataAndType(Uri.fromFile(pdfFile), "application/pdf");
-                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                intent.setDataAndType(contentUri, "application/pdf");
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 try {
                     startActivity(intent);
                 } catch (Exception e) {
@@ -37,6 +43,12 @@ public class PreviewActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(PreviewActivity.this, "PDF file not found", Toast.LENGTH_SHORT).show();
             }
+        });
+
+        btnBackToHistory.setOnClickListener(v -> {
+            Intent intent = new Intent(PreviewActivity.this, HomeActivity.class);
+            startActivity(intent);
+            finish();
         });
     }
 }

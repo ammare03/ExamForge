@@ -11,7 +11,6 @@ public class QuestionPaper {
     private String filePath;
     private long createdAt;
 
-    // Constructor
     public QuestionPaper(String title, String filePath, long createdAt) {
         this.title = title;
         this.filePath = filePath;

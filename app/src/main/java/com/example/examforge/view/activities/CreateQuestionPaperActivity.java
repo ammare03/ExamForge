@@ -15,6 +15,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.examforge.R;
 import com.example.examforge.manager.ChatGPTManager;
+import com.example.examforge.model.QuestionPaper;
+import com.example.examforge.repository.QuestionPaperHistoryRepository;
 import com.example.examforge.utils.PDFGenerator;
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader;
 import com.tom_roush.pdfbox.pdmodel.PDDocument;
@@ -39,7 +41,6 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
         PDFBoxResourceLoader.init(getApplicationContext());
         setContentView(R.layout.activity_create_question_paper);
 
-        // Initialize views
         btnChoosePDF = findViewById(R.id.btnChoosePDF);
         btnSubmit = findViewById(R.id.btnSubmit);
         tvFileName = findViewById(R.id.tvFileName);
@@ -47,17 +48,15 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
         etAdditionalParams = findViewById(R.id.etAdditionalParams);
         spinnerQuestionType = findViewById(R.id.spinnerQuestionType);
 
-        // Populate spinner with sample question types
+        // Populate spinner with question types.
         String[] questionTypes = {"MCQ", "Subjective", "Mixed"};
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, questionTypes);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerQuestionType.setAdapter(spinnerAdapter);
 
-        // Set up PDF chooser
         btnChoosePDF.setOnClickListener(v -> openFileChooser());
 
-        // Handle submission: validate inputs and generate question paper using ChatGPTManager.
         btnSubmit.setOnClickListener(v -> {
             if (pdfUri == null) {
                 Toast.makeText(CreateQuestionPaperActivity.this, "Please select a PDF file", Toast.LENGTH_SHORT).show();
@@ -78,19 +77,23 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
 
             Toast.makeText(CreateQuestionPaperActivity.this, "Generating question paper...", Toast.LENGTH_SHORT).show();
 
-            // Initialize ChatGPTManager and generate question paper by sending the extracted text in chunks.
+            // Use ChatGPTManager to generate question paper.
             ChatGPTManager chatGPTManager = new ChatGPTManager();
-            // Using chunk size of 1000 characters; adjust as needed.
+            // Chunk size of 1000 characters (adjust as needed)
             chatGPTManager.generateQuestionPaper(extractedText, 1000, marks, questionType, additionalParams, new ChatGPTManager.ChatGPTCallback() {
                 @Override
                 public void onComplete(String combinedResponse) {
-                    // Combine total marks with generated questions.
                     String finalOutput = "Total Marks: " + marks + "\n\n" + combinedResponse;
                     runOnUiThread(() -> {
                         try {
                             File pdfFile = PDFGenerator.generatePDF(CreateQuestionPaperActivity.this,
                                     finalOutput, "GeneratedQuestionPaper.pdf");
-                            // Navigate to PreviewActivity with the PDF file path.
+                            // Save metadata into Room database.
+                            QuestionPaperHistoryRepository repository = new QuestionPaperHistoryRepository(CreateQuestionPaperActivity.this);
+                            QuestionPaper paper = new QuestionPaper("Generated Question Paper", pdfFile.getAbsolutePath(), System.currentTimeMillis());
+                            repository.insert(paper);
+
+                            // Navigate to PreviewActivity.
                             Intent intent = new Intent(CreateQuestionPaperActivity.this, PreviewActivity.class);
                             intent.putExtra("pdfFilePath", pdfFile.getAbsolutePath());
                             startActivity(intent);
@@ -127,7 +130,6 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
         }
     }
 
-    // Helper method to retrieve file name from Uri.
     private String getFileName(Uri uri) {
         String result = "Selected File";
         Cursor cursor = getContentResolver().query(uri, null, null, null, null);
@@ -144,7 +146,6 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
         return result;
     }
 
-    // Method to extract text from PDF using PdfBox-Android.
     private void extractTextFromPDF(Uri uri) {
         try {
             InputStream inputStream = getContentResolver().openInputStream(uri);

@@ -19,15 +19,11 @@ public class QuestionPaperHistoryRepository {
     }
 
     public void insert(QuestionPaper questionPaper) {
-        executor.execute(() -> {
-            questionPaperDao.insert(questionPaper);
-        });
+        executor.execute(() -> questionPaperDao.insert(questionPaper));
     }
 
     public void delete(QuestionPaper questionPaper) {
-        executor.execute(() -> {
-            questionPaperDao.delete(questionPaper);
-        });
+        executor.execute(() -> questionPaperDao.delete(questionPaper));
     }
 
     public LiveData<List<QuestionPaper>> getAllQuestionPapers() {

@@ -8,11 +8,25 @@
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp">
 
-    <TextView
-        android:id="@+id/tvPaperTitle"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:text="Question Paper Title"
-        android:textSize="18sp"/>
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvPaperTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Question Paper Title"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvPaperDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Date Created"
+            android:textSize="14sp" />
+    </LinearLayout>
 </androidx.cardview.widget.CardView>

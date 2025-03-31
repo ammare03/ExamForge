@@ -7,17 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.examforge.R;
 import com.example.examforge.model.QuestionPaper;
 import com.example.examforge.repository.QuestionPaperHistoryRepository;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +38,7 @@ public class HomeActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         historyRepository = new QuestionPaperHistoryRepository(this);
-        // Observe changes in the database
+        // Observe changes in the database and update RecyclerView
         historyRepository.getAllQuestionPapers().observe(this, new Observer<List<QuestionPaper>>() {
             @Override
             public void onChanged(List<QuestionPaper> questionPapers) {
@@ -50,7 +47,7 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         fabAdd.setOnClickListener(v -> {
-            // Navigate to the PDF upload and parameter screen
+            // Navigate to the CreateQuestionPaperActivity
             startActivity(new Intent(HomeActivity.this, CreateQuestionPaperActivity.class));
         });
     }
@@ -71,8 +68,7 @@ public class HomeActivity extends AppCompatActivity {
 
         @Override
         public PaperViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_question_paper, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_question_paper, parent, false);
             return new PaperViewHolder(view);
         }
 
@@ -80,13 +76,21 @@ public class HomeActivity extends AppCompatActivity {
         public void onBindViewHolder(PaperViewHolder holder, int position) {
             QuestionPaper paper = paperList.get(position);
             holder.tvPaperTitle.setText(paper.getTitle());
-            // Allow deletion on long press
+            // Optionally display creation date
+            holder.tvPaperDate.setText(android.text.format.DateFormat.format("yyyy-MM-dd HH:mm", paper.getCreatedAt()));
+
+            // On item click, open PreviewActivity to view the PDF.
+            holder.itemView.setOnClickListener(v -> {
+                Intent intent = new Intent(HomeActivity.this, PreviewActivity.class);
+                intent.putExtra("pdfFilePath", paper.getFilePath());
+                startActivity(intent);
+            });
+            // On long press, delete the paper from history.
             holder.itemView.setOnLongClickListener(v -> {
                 historyRepository.delete(paper);
                 Toast.makeText(HomeActivity.this, "Question paper deleted", Toast.LENGTH_SHORT).show();
                 return true;
             });
-            // Optionally, you can add a click listener to view the PDF using PreviewActivity.
         }
 
         @Override
@@ -95,10 +99,12 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         class PaperViewHolder extends RecyclerView.ViewHolder {
-            TextView tvPaperTitle;
+            TextView tvPaperTitle, tvPaperDate;
+
             public PaperViewHolder(View itemView) {
                 super(itemView);
                 tvPaperTitle = itemView.findViewById(R.id.tvPaperTitle);
+                tvPaperDate = itemView.findViewById(R.id.tvPaperDate);
             }
         }
     }
