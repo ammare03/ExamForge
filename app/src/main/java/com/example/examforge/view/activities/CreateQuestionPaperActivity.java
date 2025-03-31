@@ -146,6 +146,7 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
         return result;
     }
 
+    // Test comment
     private void extractTextFromPDF(Uri uri) {
         try {
             InputStream inputStream = getContentResolver().openInputStream(uri);
