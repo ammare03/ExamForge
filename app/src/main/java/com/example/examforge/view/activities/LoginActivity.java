@@ -6,9 +6,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.examforge.R;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -30,6 +33,14 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
         tvSignUpLink = findViewById(R.id.tvSignUpLink);
 
+        // Check if the user is already logged in
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            // If the user is already logged in, navigate to HomeActivity
+            startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+            finish();
+        }
+
         // Set up login button click listener
         btnLogin.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
@@ -43,7 +54,9 @@ public class LoginActivity extends AppCompatActivity {
                                 startActivity(new Intent(LoginActivity.this, HomeActivity.class));
                                 finish();
                             } else {
-                                Toast.makeText(LoginActivity.this, "Authentication Failed", Toast.LENGTH_SHORT).show();
+                                // Display error message
+                                String errorMessage = task.getException() != null ? task.getException().getMessage() : "Authentication Failed";
+                                Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
                             }
                         });
             } else {
