@@ -2,99 +2,109 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="24dp">
 
-        <!-- Button to choose PDF file -->
-        <Button
-            android:id="@+id/btnChoosePDF"
+        <!-- CardView Container for Create Question Paper Form -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardViewCreateQuestionPaper"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Choose PDF File"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            android:layout_margin="16dp"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Display selected file name -->
-        <TextView
-            android:id="@+id/tvFileName"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="No file selected"
-            android:textColor="@android:color/darker_gray"
-            app:layout_constraintTop_toBottomOf="@id/btnChoosePDF"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp" />
-
-        <!-- Input field for total marks -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilMarks"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:hint="Total Marks"
-            app:layout_constraintTop_toBottomOf="@id/tvFileName"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="16dp">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etMarks"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:orientation="vertical"
+                android:padding="16dp">
 
-        <!-- Input field for additional parameters -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilAdditionalParams"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:hint="Additional Parameters"
-            app:layout_constraintTop_toBottomOf="@id/tilMarks"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="16dp">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etAdditionalParams"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
+                <!-- Choose PDF Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnChoosePDF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Choose PDF File"
+                    app:backgroundTint="@color/purple_700"
+                    android:textColor="@android:color/white"
+                    android:layout_marginTop="16dp" />
 
-        <!-- Label for Question Type -->
-        <TextView
-            android:id="@+id/tvQuestionTypeLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Question Type:"
-            app:layout_constraintTop_toBottomOf="@id/tilAdditionalParams"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="16dp" />
+                <!-- Display the selected file name -->
+                <TextView
+                    android:id="@+id/tvFileName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="No file selected"
+                    android:textColor="@android:color/darker_gray"
+                    android:layout_marginTop="8dp" />
 
-        <!-- Spinner for selecting question type -->
-        <Spinner
-            android:id="@+id/spinnerQuestionType"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/tvQuestionTypeLabel"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp" />
+                <!-- Marks Input -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilMarks"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Total Marks"
+                    android:layout_marginTop="16dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etMarks"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Submit button to generate the question paper -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSubmit"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Generate Question Paper"
-            app:layout_constraintTop_toBottomOf="@id/spinnerQuestionType"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="24dp" />
+                <!-- Additional Parameters Input -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilAdditionalParams"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Additional Parameters"
+                    android:layout_marginTop="16dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etAdditionalParams"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- Question Type Label -->
+                <TextView
+                    android:id="@+id/tvQuestionTypeLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Question Type:"
+                    android:textColor="@android:color/black"
+                    android:layout_marginTop="16dp"/>
+
+                <!-- Spinner for Question Type -->
+                <Spinner
+                    android:id="@+id/spinnerQuestionType"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/tvQuestionTypeLabel"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="8dp" />
+
+                <!-- Submit Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSubmit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Generate Question Paper"
+                    app:backgroundTint="@color/purple_700"
+                    android:textColor="@android:color/white"
+                    android:layout_marginTop="24dp" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

@@ -2,7 +2,6 @@ package com.example.examforge.view.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,11 +25,6 @@ import com.example.examforge.repository.QuestionPaperHistoryRepository;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,32 +47,29 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
         mAuth = FirebaseAuth.getInstance();
 
+        // Initialize UI elements
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
         toolbar = findViewById(R.id.toolbar);
         recyclerView = findViewById(R.id.recyclerView);
         fabAdd = findViewById(R.id.fabAdd);
 
+        // Set up Toolbar and Drawer Layout
         setSupportActionBar(toolbar);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Set info button click listener
-        ImageView ivInfo = toolbar.findViewById(R.id.ivInfo);
-        if (ivInfo != null) {
-            ivInfo.setOnClickListener(v -> startActivity(new Intent(HomeActivity.this, AboutActivity.class)));
-        }
+        // Load user profile in the navigation drawer header
+        loadUserProfileInNavHeader();
 
-        navigationView.setNavigationItemSelectedListener(this);
-
-        loadUserProfileInNavHeader();  // Update this to remove profile picture logic
-
+        // Set up RecyclerView for question papers
         adapter = new QuestionPaperAdapter(new ArrayList<>());
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
+        // Observe changes in question papers
         historyRepository = new QuestionPaperHistoryRepository(this);
         historyRepository.getAllQuestionPapers().observe(this, new Observer<List<QuestionPaper>>() {
             @Override
@@ -87,6 +78,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
+        // FAB click listener for creating a new question paper
         fabAdd.setOnClickListener(v -> startActivity(new Intent(HomeActivity.this, CreateQuestionPaperActivity.class)));
     }
 
@@ -95,27 +87,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         TextView tvNavUserName = headerView.findViewById(R.id.tvNavUserName);
         ImageView ivNavProfilePic = headerView.findViewById(R.id.ivNavProfilePic);
 
-        // Get current user's UID from FirebaseAuth.
-        String uid = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
-        if (uid != null) {
-            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(uid);
-            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        String name = snapshot.child("name").getValue(String.class);
-                        tvNavUserName.setText(name != null ? name : "User Name");
-                        // Use placeholder image for profile picture instead of fetching it from Firebase
-                        ivNavProfilePic.setImageResource(R.drawable.ic_launcher_foreground);
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(HomeActivity.this, "Error loading user data", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+        // Set user name and placeholder profile picture
+        tvNavUserName.setText("User Name"); // Ideally fetch this from Firebase
+        ivNavProfilePic.setImageResource(R.drawable.ic_launcher_foreground); // Placeholder image
     }
 
     @Override
@@ -126,7 +100,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_about) {
             startActivity(new Intent(HomeActivity.this, AboutActivity.class));
         } else if (id == R.id.nav_logout) {
-            // Log out from Firebase Authentication
             mAuth.signOut();
             startActivity(new Intent(HomeActivity.this, LoginActivity.class));
             finish();
@@ -135,7 +108,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    // RecyclerView Adapter for displaying history.
+    // RecyclerView Adapter for displaying question papers
     private class QuestionPaperAdapter extends RecyclerView.Adapter<QuestionPaperAdapter.PaperViewHolder> {
 
         private List<QuestionPaper> paperList;
@@ -160,7 +133,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         public void onBindViewHolder(PaperViewHolder holder, int position) {
             QuestionPaper paper = paperList.get(position);
             holder.tvPaperTitle.setText(paper.getTitle());
-            holder.tvPaperDate.setText(DateFormat.format("yyyy-MM-dd HH:mm", paper.getCreatedAt()));
 
             holder.itemView.setOnClickListener(v -> {
                 Intent intent = new Intent(HomeActivity.this, PreviewActivity.class);
@@ -177,16 +149,15 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         public int getItemCount() {
-            return paperList == null ? 0 : paperList.size();
+            return paperList.size();
         }
 
         class PaperViewHolder extends RecyclerView.ViewHolder {
-            TextView tvPaperTitle, tvPaperDate;
+            TextView tvPaperTitle;
 
             public PaperViewHolder(View itemView) {
                 super(itemView);
                 tvPaperTitle = itemView.findViewById(R.id.tvPaperTitle);
-                tvPaperDate = itemView.findViewById(R.id.tvPaperDate);
             }
         }
     }

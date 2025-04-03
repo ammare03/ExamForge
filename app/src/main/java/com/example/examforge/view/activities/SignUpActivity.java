@@ -1,23 +1,25 @@
 package com.example.examforge.view.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.examforge.R;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
 public class SignUpActivity extends AppCompatActivity {
 
-    private EditText etName, etEmail, etPassword;
-    private Button btnSignUp;
+    private TextInputEditText etName, etEmail, etPassword, etConfirmPassword;
+    private MaterialButton btnSignUp;
+    private ProgressBar progressBar;
     private FirebaseAuth mAuth;
 
     @Override
@@ -30,31 +32,41 @@ public class SignUpActivity extends AppCompatActivity {
         etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
+        etConfirmPassword = findViewById(R.id.etConfirmPassword);
         btnSignUp = findViewById(R.id.btnSignUp);
+        progressBar = findViewById(R.id.progressBar);
 
+        // Handle SignUp button click
         btnSignUp.setOnClickListener(v -> {
             String name = etName.getText().toString().trim();
             String email = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
+            String confirmPassword = etConfirmPassword.getText().toString().trim();
 
-            if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            // Input validation
+            if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
                 Toast.makeText(SignUpActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
 
+            if (!password.equals(confirmPassword)) {
+                Toast.makeText(SignUpActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            progressBar.setVisibility(View.VISIBLE);
+
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(task -> {
+                        progressBar.setVisibility(View.GONE);
                         if (task.isSuccessful()) {
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            if (user != null) {
-                                DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(user.getUid());
-                                userRef.child("name").setValue(name);
-                                userRef.child("profilePic").setValue("default"); // Profile picture will not be set
-                            }
-                            Toast.makeText(SignUpActivity.this, "User created", Toast.LENGTH_SHORT).show();
-                            finish(); // Close the activity and navigate to login
+                            // After user creation, save the name to Firebase Database
+                            String userId = mAuth.getCurrentUser().getUid();
+                            mAuth.getCurrentUser().updateProfile(new UserProfileChangeRequest.Builder().setDisplayName(name).build());
+                            startActivity(new Intent(SignUpActivity.this, HomeActivity.class));
+                            finish();
                         } else {
-                            Toast.makeText(SignUpActivity.this, "Sign Up failed", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignUpActivity.this, "Sign Up failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
         });

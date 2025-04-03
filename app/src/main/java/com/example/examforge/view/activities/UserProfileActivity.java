@@ -8,7 +8,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.examforge.R;
@@ -83,20 +82,18 @@ public class UserProfileActivity extends AppCompatActivity {
     private void loadUserData() {
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     String name = dataSnapshot.child("name").getValue(String.class);
-                    // No need to load profile picture, we use a default image
                     if (name != null) {
                         etName.setText(name);
                     }
-                    // Set default profile picture
-                    ivProfilePicture.setImageResource(R.drawable.ic_launcher_foreground);
+                    ivProfilePicture.setImageResource(R.drawable.ic_launcher_foreground); // Set default profile picture
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            public void onCancelled(DatabaseError error) {
                 Toast.makeText(UserProfileActivity.this, "Error loading profile", Toast.LENGTH_SHORT).show();
             }
         });
