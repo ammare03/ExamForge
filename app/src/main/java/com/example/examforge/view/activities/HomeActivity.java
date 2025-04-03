@@ -1,8 +1,6 @@
 package com.example.examforge.view.activities;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
@@ -27,6 +25,12 @@ import com.example.examforge.model.QuestionPaper;
 import com.example.examforge.repository.QuestionPaperHistoryRepository;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,15 +44,14 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private FloatingActionButton fabAdd;
     private QuestionPaperAdapter adapter;
     private QuestionPaperHistoryRepository historyRepository;
-    private SharedPreferences sharedPreferences;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        // Initialize SharedPreferences (used for user profile data)
-        sharedPreferences = getSharedPreferences("UserProfile", MODE_PRIVATE);
+        mAuth = FirebaseAuth.getInstance();
 
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
@@ -62,7 +65,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Set info button click listener from toolbar (info button is inside toolbar)
+        // Set info button click listener
         ImageView ivInfo = toolbar.findViewById(R.id.ivInfo);
         if (ivInfo != null) {
             ivInfo.setOnClickListener(v -> startActivity(new Intent(HomeActivity.this, AboutActivity.class)));
@@ -70,8 +73,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        // Load user profile details into Navigation Drawer header
-        loadUserProfileInNavHeader();
+        loadUserProfileInNavHeader();  // Update this to remove profile picture logic
 
         adapter = new QuestionPaperAdapter(new ArrayList<>());
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -89,20 +91,30 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void loadUserProfileInNavHeader() {
-        // Get header view from NavigationView
         View headerView = navigationView.getHeaderView(0);
         TextView tvNavUserName = headerView.findViewById(R.id.tvNavUserName);
         ImageView ivNavProfilePic = headerView.findViewById(R.id.ivNavProfilePic);
 
-        // Load user data from SharedPreferences
-        String userName = sharedPreferences.getString("user_name", "User Name");
-        String profilePicUriString = sharedPreferences.getString("profile_pic_uri", null);
+        // Get current user's UID from FirebaseAuth.
+        String uid = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
+        if (uid != null) {
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(uid);
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        String name = snapshot.child("name").getValue(String.class);
+                        tvNavUserName.setText(name != null ? name : "User Name");
+                        // Use placeholder image for profile picture instead of fetching it from Firebase
+                        ivNavProfilePic.setImageResource(R.drawable.ic_launcher_foreground);
+                    }
+                }
 
-        tvNavUserName.setText(userName);
-
-        // Optionally, set profile picture if available
-        if (profilePicUriString != null) {
-            ivNavProfilePic.setImageURI(Uri.parse(profilePicUriString));
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(HomeActivity.this, "Error loading user data", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 
@@ -114,10 +126,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_about) {
             startActivity(new Intent(HomeActivity.this, AboutActivity.class));
         } else if (id == R.id.nav_logout) {
-            // Log out using FirebaseAuth if integrated
-            // For example: FirebaseAuth.getInstance().signOut();
-            // For now, we just clear SharedPreferences and redirect to LoginActivity.
-            sharedPreferences.edit().clear().apply();
+            // Log out from Firebase Authentication
+            mAuth.signOut();
             startActivity(new Intent(HomeActivity.this, LoginActivity.class));
             finish();
         }
@@ -125,7 +135,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    // RecyclerView Adapter for displaying question paper history.
+    // RecyclerView Adapter for displaying history.
     private class QuestionPaperAdapter extends RecyclerView.Adapter<QuestionPaperAdapter.PaperViewHolder> {
 
         private List<QuestionPaper> paperList;

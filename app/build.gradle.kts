@@ -55,6 +55,14 @@ dependencies {
     implementation(libs.firebase.auth)
     // Remove duplicate: implementation(libs.firebase.auth.v2101)
     implementation(libs.firebase.core)
+    implementation(libs.firebase.database)
+    implementation(libs.firebase.appcheck.interop)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.storage)
+
+    // Glide for loading images
+    implementation(libs.glide)
+    annotationProcessor(libs.compiler)
 
     // Google Sign-In / Credentials
     implementation(libs.credentials)
