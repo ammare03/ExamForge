@@ -89,5 +89,22 @@
         <item name="titleTextColor">@color/white</item>
         <item name="subtitleTextColor">@color/white</item>
         <item name="colorControlNormal">@color/white</item>
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle.Light</item>
+    </style>
+    
+    <!-- Drawer Arrow (Hamburger) Style for light mode -->
+    <style name="DrawerArrowStyle.Light" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="color">@color/white</item>
+        <item name="spinBars">true</item>
+    </style>
+    
+    <!-- Compact SearchView Style -->
+    <style name="Widget.ExamForge.SearchView" parent="Widget.AppCompat.SearchView">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColorHint">?attr/colorOnSurface</item>
+        <item name="queryBackground">@android:color/transparent</item>
+        <item name="searchIcon">@android:drawable/ic_menu_search</item>
+        <item name="closeIcon">@android:drawable/ic_menu_close_clear_cancel</item>
+        <item name="queryHint">Search question papers</item>
     </style>
 </resources>

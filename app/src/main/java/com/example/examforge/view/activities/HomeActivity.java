@@ -21,6 +21,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -40,6 +41,7 @@ import com.example.examforge.utils.ThemeManager;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -63,6 +65,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private BroadcastReceiver profileUpdateReceiver;
     private ImageView ivThemeToggle;
     private boolean isDarkMode;
+    private SearchView searchView;
+    private View noResultsContainer;
+    private TextView tvNoResultsQuery;
+    private List<QuestionPaper> allQuestionPapers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +87,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         toolbar = findViewById(R.id.toolbar);
         recyclerView = findViewById(R.id.recyclerView);
         fabAdd = findViewById(R.id.fabAdd);
+        searchView = findViewById(R.id.searchView);
+        noResultsContainer = findViewById(R.id.noResultsContainer);
+        tvNoResultsQuery = findViewById(R.id.tvNoResultsQuery);
 
         // Initialize the profile picture reference
         View headerView = navigationView.getHeaderView(0);
@@ -120,9 +129,14 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             new IntentFilter("com.example.examforge.PROFILE_UPDATED")
         );
 
+        // Initialize adapter with empty list
+        allQuestionPapers = new ArrayList<>();
         adapter = new QuestionPaperAdapter(new ArrayList<>());
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
+
+        // Setup search view
+        setupSearchView();
 
         historyRepository = new QuestionPaperHistoryRepository(this);
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -130,12 +144,15 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             // Get only this user's question papers
             historyRepository.getQuestionPapersForUser(currentUser.getUid()).observe(this, questionPapers -> {
                 if (questionPapers != null && !questionPapers.isEmpty()) {
-                    adapter.updateData(questionPapers);
+                    allQuestionPapers = new ArrayList<>(questionPapers);
+                    adapter.updateData(allQuestionPapers);
                     recyclerView.setVisibility(View.VISIBLE);
                     findViewById(R.id.emptyStateContainer).setVisibility(View.GONE);
+                    noResultsContainer.setVisibility(View.GONE);
                 } else {
                     recyclerView.setVisibility(View.GONE);
                     findViewById(R.id.emptyStateContainer).setVisibility(View.VISIBLE);
+                    noResultsContainer.setVisibility(View.GONE);
                 }
             });
         }
@@ -168,10 +185,26 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private void loadUserProfileInNavHeader() {
         View headerView = navigationView.getHeaderView(0);
         TextView tvNavUserName = headerView.findViewById(R.id.tvNavUserName);
+        TextView tvNavUserEmail = headerView.findViewById(R.id.tvNavUserEmail);
         ShapeableImageView ivNavUserPhoto = headerView.findViewById(R.id.ivNavUserPhoto);
+        
+        // Ensure the ShapeableImageView has a circular shape
+        ivNavUserPhoto.setShapeAppearanceModel(
+            ShapeAppearanceModel.builder()
+                .setAllCornerSizes(ShapeAppearanceModel.PILL)
+                .build()
+        );
         
         String uid = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
         if (uid != null) {
+            // Load user email
+            String email = mAuth.getCurrentUser().getEmail();
+            if (email != null && !email.isEmpty()) {
+                tvNavUserEmail.setText(email);
+            } else {
+                tvNavUserEmail.setText("ExamForge User");
+            }
+            
             // Load user name from Firebase
             FirebaseManager.getUserName(uid, new FirebaseManager.OnUserDataCallback() {
                 @Override
@@ -195,6 +228,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                             .load(imageFile)
                             .skipMemoryCache(true)
                             .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .circleCrop() // Apply circle crop transformation
                             .placeholder(R.drawable.ic_launcher_foreground)
                             .error(R.drawable.ic_launcher_foreground)
                             .into(ivNavUserPhoto);
@@ -207,6 +241,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                     ivNavUserPhoto.setImageResource(R.drawable.ic_launcher_foreground);
                 }
             });
+        } else {
+            // Not logged in
+            tvNavUserName.setText("Guest User");
+            tvNavUserEmail.setText("Not logged in");
+            ivNavUserPhoto.setImageResource(R.drawable.ic_launcher_foreground);
         }
     }
 
@@ -390,6 +429,115 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             ivThemeToggle.setVisibility(View.VISIBLE);
         } else {
             Log.e(TAG, "Cannot update theme icon - view is null");
+        }
+    }
+
+    private void setupSearchView() {
+        // Configure search view appearance
+        searchView.setMaxWidth(Integer.MAX_VALUE);
+        
+        // Make sure the search view is clickable and focusable
+        searchView.setClickable(true);
+        searchView.setFocusable(true);
+        searchView.setFocusableInTouchMode(true);
+        
+        // Get the search edit text view
+        View searchEditText = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+        if (searchEditText != null) {
+            searchEditText.setClickable(true);
+            searchEditText.setFocusable(true);
+            searchEditText.setFocusableInTouchMode(true);
+        }
+        
+        // Remove extra padding to make it more compact
+        View searchEditFrame = searchView.findViewById(androidx.appcompat.R.id.search_edit_frame);
+        if (searchEditFrame != null) {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) searchEditFrame.getLayoutParams();
+            params.topMargin = 0;
+            params.bottomMargin = 0;
+            searchEditFrame.setLayoutParams(params);
+        }
+        
+        // Find the search text view to adjust its appearance
+        View searchPlate = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+        if (searchPlate != null && searchPlate instanceof TextView) {
+            TextView searchTextView = (TextView) searchPlate;
+            searchTextView.setTextSize(14f);
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) searchPlate.getLayoutParams();
+            params.topMargin = 0;
+            params.bottomMargin = 0;
+            searchPlate.setLayoutParams(params);
+        }
+        
+        // Set query listener
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                filterQuestionPapers(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filterQuestionPapers(newText);
+                return true;
+            }
+        });
+        
+        // Fix for clicking issue - use click listener
+        View.OnClickListener clickListener = v -> {
+            searchView.onActionViewExpanded();
+            searchView.requestFocus();
+        };
+        
+        // Attach the click listener to both the search view and its parent card
+        searchView.setOnClickListener(clickListener);
+        View searchCardView = findViewById(R.id.searchCardView);
+        if (searchCardView != null) {
+            searchCardView.setOnClickListener(clickListener);
+        }
+        
+        // Add clear listener to reset to all papers
+        searchView.setOnCloseListener(() -> {
+            adapter.updateData(allQuestionPapers);
+            recyclerView.setVisibility(View.VISIBLE);
+            noResultsContainer.setVisibility(View.GONE);
+            return false;
+        });
+    }
+    
+    private void filterQuestionPapers(String query) {
+        if (allQuestionPapers == null || allQuestionPapers.isEmpty()) {
+            return;
+        }
+        
+        if (query == null || query.trim().isEmpty()) {
+            // If query is empty, show all papers
+            adapter.updateData(allQuestionPapers);
+            recyclerView.setVisibility(View.VISIBLE);
+            noResultsContainer.setVisibility(View.GONE);
+            return;
+        }
+        
+        String lowerCaseQuery = query.toLowerCase().trim();
+        List<QuestionPaper> filteredList = new ArrayList<>();
+        
+        for (QuestionPaper paper : allQuestionPapers) {
+            if (paper.getTitle().toLowerCase().contains(lowerCaseQuery)) {
+                filteredList.add(paper);
+            }
+        }
+        
+        if (filteredList.isEmpty()) {
+            // Show "no results" view with the query
+            recyclerView.setVisibility(View.GONE);
+            noResultsContainer.setVisibility(View.VISIBLE);
+            tvNoResultsQuery.setText("No results found for \"" + query + "\"");
+        } else {
+            // Update adapter with filtered data
+            adapter.updateData(filteredList);
+            recyclerView.setVisibility(View.VISIBLE);
+            noResultsContainer.setVisibility(View.GONE);
         }
     }
 }

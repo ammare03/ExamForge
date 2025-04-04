@@ -23,56 +23,130 @@
             
         </com.google.android.material.appbar.AppBarLayout>
 
-        <!-- Content Frame: RecyclerView for displaying history -->
-        <FrameLayout
+        <!-- Content Frame -->
+        <LinearLayout
             android:id="@+id/content_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:orientation="vertical"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <!-- Empty state view (initially visible) -->
-            <LinearLayout
-                android:id="@+id/emptyStateContainer"
+            <!-- Search bar for filtering papers -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/searchCardView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                style="@style/Widget.ExamForge.CardView">
 
-                <ImageView
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:src="@drawable/app_logo"
-                    android:alpha="0.7"
-                    android:contentDescription="Empty state illustration" />
-
-                <TextView
-                    android:layout_width="wrap_content"
+                <androidx.appcompat.widget.SearchView
+                    android:id="@+id/searchView"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="No Question Papers Yet"
-                    android:textAppearance="@style/TextAppearance.ExamForge.HeadlineSmall"
-                    android:textColor="@color/text_primary" />
+                    android:minHeight="36dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:iconifiedByDefault="false"
+                    app:iconifiedByDefault="false"
+                    android:imeOptions="actionSearch|flagNoExtractUi"
+                    app:queryHint="Search question papers"/>
+            </com.google.android.material.card.MaterialCardView>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginHorizontal="32dp"
-                    android:text="Tap the + button to create your first question paper"
-                    android:textAppearance="@style/TextAppearance.ExamForge.BodyMedium"
-                    android:textColor="@color/text_secondary"
-                    android:textAlignment="center" />
-            </LinearLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerView"
+            <!-- Container for RecyclerView and Empty/No Results states -->
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:padding="16dp" />
-        </FrameLayout>
+                android:layout_height="match_parent">
+
+                <!-- Empty state view -->
+                <LinearLayout
+                    android:id="@+id/emptyStateContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <ImageView
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:src="@drawable/app_logo"
+                        android:alpha="0.7"
+                        android:contentDescription="Empty state illustration" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="No Question Papers Yet"
+                        android:textAppearance="@style/TextAppearance.ExamForge.HeadlineSmall"
+                        android:textColor="@color/text_primary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginHorizontal="32dp"
+                        android:text="Tap the + button to create your first question paper"
+                        android:textAppearance="@style/TextAppearance.ExamForge.BodyMedium"
+                        android:textColor="@color/text_secondary"
+                        android:textAlignment="center" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="16dp" />
+
+                <!-- No results view -->
+                <LinearLayout
+                    android:id="@+id/noResultsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:src="@drawable/app_logo"
+                        android:alpha="0.5"
+                        android:contentDescription="No results found" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="No matching papers found"
+                        android:textAppearance="@style/TextAppearance.ExamForge.HeadlineSmall"
+                        android:textColor="@color/text_primary" />
+
+                    <TextView
+                        android:id="@+id/tvNoResultsQuery"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginHorizontal="32dp"
+                        android:text="Try a different search query"
+                        android:textAppearance="@style/TextAppearance.ExamForge.BodyMedium"
+                        android:textColor="@color/text_secondary"
+                        android:textAlignment="center" />
+                </LinearLayout>
+            </FrameLayout>
+        </LinearLayout>
 
         <!-- FloatingActionButton for creating a new question paper -->
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -95,10 +169,10 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@color/white"
+        android:background="?attr/colorSurface"
         app:headerLayout="@layout/nav_header"
-        app:itemTextColor="@color/text_primary"
-        app:itemIconTint="@color/primary"
+        app:itemTextColor="?attr/colorOnSurface"
+        app:itemIconTint="?attr/colorPrimary"
         app:itemTextAppearance="@style/TextAppearance.ExamForge.BodyMedium"
         app:itemIconPadding="16dp"
         app:itemHorizontalPadding="24dp"

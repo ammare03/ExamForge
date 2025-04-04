@@ -6,5 +6,12 @@
         <item name="titleTextColor">@color/white</item>
         <item name="subtitleTextColor">@color/white</item>
         <item name="colorControlNormal">@color/white</item>
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle.Dark</item>
+    </style>
+    
+    <!-- Drawer Arrow (Hamburger) Style for dark mode -->
+    <style name="DrawerArrowStyle.Dark" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="color">@color/white</item>
+        <item name="spinBars">true</item>
     </style>
 </resources> 

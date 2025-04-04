@@ -53,4 +53,5 @@
     <color name="dark_text_primary">#E0E0E0</color>
     <color name="dark_text_secondary">#A0A0A0</color>
     <color name="dark_on_surface">#E0E0E0</color>
+    <color name="dark_drawer_icon_tint">#E0E0E0</color>
 </resources>
