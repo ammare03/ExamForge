@@ -1,0 +1,50 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="240dp"
+    android:viewportWidth="240"
+    android:viewportHeight="240">
+    
+    <!-- Background -->
+    <path
+        android:pathData="M120,120m-120,0a120,120 0,1 1,240 0a120,120 0,1 1,-240 0"
+        android:fillColor="@color/primary"/>
+    
+    <!-- Overlapping circles -->
+    <path
+        android:pathData="M120,120m-90,0a90,90 0,1 1,180 0a90,90 0,1 1,-180 0"
+        android:fillColor="@color/primary_light"/>
+    
+    <!-- Document shape -->
+    <path
+        android:pathData="M70,50L170,50A10,10 0,0 1,180 60L180,180A10,10 0,0 1,170 190L70,190A10,10 0,0 1,60 180L60,60A10,10 0,0 1,70 50z"
+        android:fillColor="@color/white"/>
+    
+    <!-- Lines representing text -->
+    <path
+        android:pathData="M80,80L160,80"
+        android:strokeWidth="8"
+        android:strokeColor="@color/accent"/>
+    
+    <path
+        android:pathData="M80,105L140,105"
+        android:strokeWidth="8" 
+        android:strokeColor="@color/accent_light"/>
+    
+    <path
+        android:pathData="M80,130L160,130"
+        android:strokeWidth="8"
+        android:strokeColor="@color/accent"/>
+    
+    <path
+        android:pathData="M80,155L120,155"
+        android:strokeWidth="8"
+        android:strokeColor="@color/accent_light"/>
+    
+    <!-- CheckMark -->
+    <path
+        android:pathData="M185,115L145,155L125,135"
+        android:strokeWidth="12"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeColor="@color/success"/>
+</vector> 
