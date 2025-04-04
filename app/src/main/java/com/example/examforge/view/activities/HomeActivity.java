@@ -166,16 +166,16 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    @Override
+            @Override
     protected void onDestroy() {
         super.onDestroy();
         // Unregister broadcast receiver
         if (profileUpdateReceiver != null) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(profileUpdateReceiver);
         }
-    }
+            }
 
-    @Override
+            @Override
     protected void onResume() {
         super.onResume();
         // Refresh the profile picture when returning to this activity
@@ -209,7 +209,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             FirebaseManager.getUserName(uid, new FirebaseManager.OnUserDataCallback() {
                 @Override
                 public void onUserNameLoaded(String name) {
-                    tvNavUserName.setText(name != null ? name : "User Name");
+                        tvNavUserName.setText(name != null ? name : "User Name");
                 }
 
                 @Override
@@ -361,11 +361,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                     Toast.makeText(HomeActivity.this, "Question paper deleted", Toast.LENGTH_SHORT).show();
                 }
             }
-
-            @Override
-            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-            }
         };
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
@@ -376,15 +371,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         // Get current theme state
         isDarkMode = ThemeManager.getDarkModeState(this);
         
-        Log.d(TAG, "Setting up theme toggle, isDarkMode: " + isDarkMode);
-        
         // Find the theme toggle button in the toolbar
         ivThemeToggle = toolbar.findViewById(R.id.ivThemeToggle);
         
         // Ensure the toggle is visible and configured properly
         if (ivThemeToggle != null) {
-            Log.d(TAG, "Theme toggle found, making visible");
-            
             ivThemeToggle.setVisibility(View.VISIBLE);
             
             // Make sure the icon has the right tint color
@@ -395,12 +386,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             
             // Set click listener for theme toggle
             ivThemeToggle.setOnClickListener(v -> {
-                Log.d(TAG, "Theme toggle clicked, current mode: " + isDarkMode);
-                
                 // Toggle theme
                 isDarkMode = ThemeManager.toggleDarkMode(this);
-                
-                Log.d(TAG, "Theme toggled to: " + (isDarkMode ? "dark" : "light"));
                 
                 // Update icon immediately
                 updateThemeIcon();
@@ -419,16 +406,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     
     private void updateThemeIcon() {
         if (ivThemeToggle != null) {
-            Log.d(TAG, "Updating theme icon to: " + (isDarkMode ? "light_mode" : "dark_mode"));
-            
             ivThemeToggle.setImageResource(isDarkMode 
                 ? R.drawable.ic_light_mode  // Show light mode icon when in dark mode
                 : R.drawable.ic_dark_mode); // Show dark mode icon when in light mode
                 
             // Ensure visibility again
             ivThemeToggle.setVisibility(View.VISIBLE);
-        } else {
-            Log.e(TAG, "Cannot update theme icon - view is null");
         }
     }
 
@@ -441,32 +424,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         searchView.setFocusable(true);
         searchView.setFocusableInTouchMode(true);
         
-        // Get the search edit text view
-        View searchEditText = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
-        if (searchEditText != null) {
-            searchEditText.setClickable(true);
-            searchEditText.setFocusable(true);
-            searchEditText.setFocusableInTouchMode(true);
-        }
-        
-        // Remove extra padding to make it more compact
-        View searchEditFrame = searchView.findViewById(androidx.appcompat.R.id.search_edit_frame);
-        if (searchEditFrame != null) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) searchEditFrame.getLayoutParams();
-            params.topMargin = 0;
-            params.bottomMargin = 0;
-            searchEditFrame.setLayoutParams(params);
-        }
-        
         // Find the search text view to adjust its appearance
         View searchPlate = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
         if (searchPlate != null && searchPlate instanceof TextView) {
             TextView searchTextView = (TextView) searchPlate;
             searchTextView.setTextSize(14f);
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) searchPlate.getLayoutParams();
-            params.topMargin = 0;
-            params.bottomMargin = 0;
-            searchPlate.setLayoutParams(params);
         }
         
         // Set query listener

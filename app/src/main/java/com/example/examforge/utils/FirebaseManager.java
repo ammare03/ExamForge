@@ -1,10 +1,8 @@
 package com.example.examforge.utils;
 
 import androidx.annotation.NonNull;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -21,32 +19,10 @@ public class FirebaseManager {
     private static final String USERS_NODE = "users";
     
     /**
-     * Get a reference to the users database node
-     */
-    public static DatabaseReference getUsersReference() {
-        return FirebaseDatabase.getInstance().getReference(USERS_NODE);
-    }
-    
-    /**
      * Get a reference to a specific user in the database
      */
-    public static DatabaseReference getUserReference(String userId) {
-        return getUsersReference().child(userId);
-    }
-    
-    /**
-     * Get the currently logged in user's ID or null if not logged in
-     */
-    public static String getCurrentUserId() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        return user != null ? user.getUid() : null;
-    }
-    
-    /**
-     * Get the currently logged in user or null if not logged in
-     */
-    public static FirebaseUser getCurrentUser() {
-        return FirebaseAuth.getInstance().getCurrentUser();
+    private static DatabaseReference getUserReference(String userId) {
+        return FirebaseDatabase.getInstance().getReference(USERS_NODE).child(userId);
     }
     
     /**

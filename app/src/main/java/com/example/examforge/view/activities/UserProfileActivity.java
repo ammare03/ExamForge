@@ -171,18 +171,13 @@ public class UserProfileActivity extends AppCompatActivity {
         });
         
         // Load profile picture from Room
-        Log.d(TAG, "Loading profile picture for user: " + userId);
         userRepository.getUserById(userId).observe(this, user -> {
             localUserProfile = user;
             if (user != null) {
-                Log.d(TAG, "User found in database: " + user.getUserId());
                 if (user.getProfilePicPath() != null) {
-                    Log.d(TAG, "Loading profile image from path: " + user.getProfilePicPath());
                     // Check if file exists
                     File imageFile = new File(user.getProfilePicPath());
                     if (imageFile.exists()) {
-                        Log.d(TAG, "Image file exists, loading with Glide");
-                        
                         // Clear any previous image loading
                         Glide.with(UserProfileActivity.this).clear(ivProfilePicture);
                         
@@ -195,15 +190,12 @@ public class UserProfileActivity extends AppCompatActivity {
                             .error(R.drawable.ic_launcher_foreground)
                             .into(ivProfilePicture);
                     } else {
-                        Log.e(TAG, "Image file does not exist at path: " + user.getProfilePicPath());
                         ivProfilePicture.setImageResource(R.drawable.ic_launcher_foreground);
                     }
                 } else {
-                    Log.d(TAG, "User has no profile picture path");
                     ivProfilePicture.setImageResource(R.drawable.ic_launcher_foreground);
                 }
             } else {
-                Log.d(TAG, "No user found in local database for userId: " + userId);
                 ivProfilePicture.setImageResource(R.drawable.ic_launcher_foreground);
             }
         });
@@ -262,11 +254,9 @@ public class UserProfileActivity extends AppCompatActivity {
         if (selectedImageUri == null) return;
         
         Toast.makeText(UserProfileActivity.this, "Saving profile picture...", Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "Saving profile picture for user: " + userId);
         
         // Delete old profile picture if it exists
         if (localUserProfile != null && localUserProfile.getProfilePicPath() != null) {
-            Log.d(TAG, "Deleting old profile picture: " + localUserProfile.getProfilePicPath());
             ImageStorageManager.deleteImageFromInternalStorage(localUserProfile.getProfilePicPath());
         }
         
@@ -274,14 +264,11 @@ public class UserProfileActivity extends AppCompatActivity {
         String imagePath = ImageStorageManager.saveImageToInternalStorage(this, selectedImageUri, userId);
         
         if (imagePath != null) {
-            Log.d(TAG, "Image saved successfully at: " + imagePath);
             // Update user with new profile picture path in Room
             if (localUserProfile == null) {
-                Log.d(TAG, "Creating new user profile in database");
                 localUserProfile = new User(userId, imagePath);
                 userRepository.insert(localUserProfile);
             } else {
-                Log.d(TAG, "Updating existing user profile in database");
                 localUserProfile.setProfilePicPath(imagePath);
                 userRepository.update(localUserProfile);
             }
@@ -289,8 +276,6 @@ public class UserProfileActivity extends AppCompatActivity {
             // Verify the file exists before loading
             File imageFile = new File(imagePath);
             if (imageFile.exists()) {
-                Log.d(TAG, "Loading newly saved image with Glide");
-                
                 // Clear any previous image loading
                 Glide.with(UserProfileActivity.this).clear(ivProfilePicture);
                 
@@ -309,11 +294,9 @@ public class UserProfileActivity extends AppCompatActivity {
                 
                 Toast.makeText(UserProfileActivity.this, "Profile picture updated", Toast.LENGTH_SHORT).show();
             } else {
-                Log.e(TAG, "Saved image file doesn't exist: " + imagePath);
                 Toast.makeText(UserProfileActivity.this, "Error: Saved file not found", Toast.LENGTH_SHORT).show();
             }
         } else {
-            Log.e(TAG, "Failed to save profile picture");
             Toast.makeText(UserProfileActivity.this, "Failed to save profile picture", Toast.LENGTH_SHORT).show();
         }
     }

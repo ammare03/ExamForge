@@ -57,7 +57,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="end"
-        android:layout_marginEnd="56dp"
+        android:layout_marginEnd="15dp"
         android:padding="8dp"
         android:src="@drawable/ic_dark_mode"
         android:contentDescription="Toggle dark mode"
