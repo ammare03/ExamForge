@@ -29,4 +29,8 @@ public class QuestionPaperHistoryRepository {
     public LiveData<List<QuestionPaper>> getAllQuestionPapers() {
         return questionPaperDao.getAllQuestionPapers();
     }
+
+    public LiveData<List<QuestionPaper>> getQuestionPapersForUser(String userId) {
+        return questionPaperDao.getQuestionPapersForUser(userId);
+    }
 }

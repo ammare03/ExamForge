@@ -28,6 +28,7 @@ import com.example.examforge.repository.QuestionPaperHistoryRepository;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -75,19 +76,23 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        loadUserProfileInNavHeader();  // Update this to remove profile picture logic
+        loadUserProfileInNavHeader();
 
         adapter = new QuestionPaperAdapter(new ArrayList<>());
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
         historyRepository = new QuestionPaperHistoryRepository(this);
-        historyRepository.getAllQuestionPapers().observe(this, new Observer<List<QuestionPaper>>() {
-            @Override
-            public void onChanged(List<QuestionPaper> questionPapers) {
-                adapter.setData(questionPapers);
-            }
-        });
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String uid = currentUser.getUid();
+            historyRepository.getQuestionPapersForUser(uid).observe(this, new Observer<List<QuestionPaper>>() {
+                @Override
+                public void onChanged(List<QuestionPaper> questionPapers) {
+                    adapter.setData(questionPapers);
+                }
+            });
+        }
 
         fabAdd.setOnClickListener(v -> startActivity(new Intent(HomeActivity.this, CreateQuestionPaperActivity.class)));
 
@@ -106,7 +111,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
                 QuestionPaper questionPaper = adapter.getQuestionPapers().get(position);
-                // Delete the item from the database
                 historyRepository.delete(questionPaper);
                 Toast.makeText(HomeActivity.this, "Question paper deleted", Toast.LENGTH_SHORT).show();
             }
@@ -123,8 +127,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private void loadUserProfileInNavHeader() {
         View headerView = navigationView.getHeaderView(0);
         TextView tvNavUserName = headerView.findViewById(R.id.tvNavUserName);
-
-        // Get current user's UID from FirebaseAuth.
+        // No profile picture is needed; only the name is displayed.
         String uid = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
         if (uid != null) {
             DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(uid);
@@ -134,7 +137,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                     if (snapshot.exists()) {
                         String name = snapshot.child("name").getValue(String.class);
                         tvNavUserName.setText(name != null ? name : "User Name");
-                        // Use placeholder image for profile picture instead of fetching it from Firebase
                     }
                 }
 
@@ -154,7 +156,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_about) {
             startActivity(new Intent(HomeActivity.this, AboutActivity.class));
         } else if (id == R.id.nav_logout) {
-            // Log out from Firebase Authentication
             mAuth.signOut();
             startActivity(new Intent(HomeActivity.this, LoginActivity.class));
             finish();

@@ -18,6 +18,7 @@ import com.example.examforge.manager.ChatGPTManager;
 import com.example.examforge.model.QuestionPaper;
 import com.example.examforge.repository.QuestionPaperHistoryRepository;
 import com.example.examforge.utils.PDFGenerator;
+import com.google.firebase.auth.FirebaseAuth;
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader;
 import com.tom_roush.pdfbox.pdmodel.PDDocument;
 import com.tom_roush.pdfbox.text.PDFTextStripper;
@@ -79,15 +80,13 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
             // Get the file name entered by the user
             String userFileName = etFileName.getText().toString().trim();
             if (userFileName.isEmpty()) {
-                userFileName = "GeneratedQuestionPaper"; // Use a default name if not provided by the user
+                userFileName = "GeneratedQuestionPaper"; // Default name if not provided
             }
             userFileName = userFileName + ".pdf"; // Ensure the file name has a .pdf extension
 
             Toast.makeText(CreateQuestionPaperActivity.this, "Generating question paper...", Toast.LENGTH_SHORT).show();
 
-            // Use ChatGPTManager to generate question paper.
             ChatGPTManager chatGPTManager = new ChatGPTManager();
-            // Chunk size of 1000 characters (adjust as needed)
             String finalUserFileName = userFileName;
             chatGPTManager.generateQuestionPaper(extractedText, 1000, marks, questionType, additionalParams, new ChatGPTManager.ChatGPTCallback() {
                 @Override
@@ -95,11 +94,13 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
                     String finalOutput = "Total Marks: " + marks + "\n\n" + combinedResponse;
                     runOnUiThread(() -> {
                         try {
-                            File pdfFile = PDFGenerator.generatePDF(CreateQuestionPaperActivity.this,
-                                    finalOutput, finalUserFileName);
-                            // Save metadata into Room database.
+                            File pdfFile = PDFGenerator.generatePDF(CreateQuestionPaperActivity.this, finalOutput, finalUserFileName);
+                            // Get current user's uid from FirebaseAuth
+                            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                            // Create QuestionPaper with the user's uid
+                            QuestionPaper paper = new QuestionPaper(finalUserFileName, pdfFile.getAbsolutePath(), System.currentTimeMillis(), uid);
+                            // Insert into Room database
                             QuestionPaperHistoryRepository repository = new QuestionPaperHistoryRepository(CreateQuestionPaperActivity.this);
-                            QuestionPaper paper = new QuestionPaper(finalUserFileName, pdfFile.getAbsolutePath(), System.currentTimeMillis());
                             repository.insert(paper);
 
                             // Navigate to PreviewActivity.
@@ -155,7 +156,6 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
         return result;
     }
 
-    // Test comment
     private void extractTextFromPDF(Uri uri) {
         try {
             InputStream inputStream = getContentResolver().openInputStream(uri);

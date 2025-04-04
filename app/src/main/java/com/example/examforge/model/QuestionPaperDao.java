@@ -15,6 +15,10 @@ public interface QuestionPaperDao {
     @Query("SELECT * FROM question_papers ORDER BY createdAt DESC")
     LiveData<List<QuestionPaper>> getAllQuestionPapers();
 
+    // New query: fetch only question papers for a given userId
+    @Query("SELECT * FROM question_papers WHERE userId = :userId ORDER BY createdAt DESC")
+    LiveData<List<QuestionPaper>> getQuestionPapersForUser(String userId);
+
     @Delete
     void delete(QuestionPaper questionPaper);
 }
