@@ -8,10 +8,12 @@
     android:layout_marginHorizontal="8dp"
     android:layout_marginVertical="6dp"
     app:cardCornerRadius="12dp"
-    app:cardElevation="2dp"
-    app:strokeWidth="0dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/primary"
     android:clickable="true"
     android:focusable="true"
+    app:cardBackgroundColor="@color/white"
     app:rippleColor="?attr/colorControlHighlight">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -19,57 +21,71 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <!-- Document Icon -->
-        <ImageView
-            android:id="@+id/ivDocIcon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/app_logo"
-            android:alpha="0.8"
-            android:contentDescription="Document Icon"
+        <!-- Document Icon with Background -->
+        <FrameLayout
+            android:id="@+id/flIconContainer"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@color/primary"
+            android:alpha="0.15"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/tvPaperTitle"
+            app:layout_constraintTop_toTopOf="parent">
+            
+            <ImageView
+                android:id="@+id/ivDocIcon"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/app_logo"
+                android:layout_gravity="center"
+                android:alpha="1.0"
+                android:contentDescription="Document Icon" />
+        </FrameLayout>
+        
+        <!-- Item content container -->
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="8dp"
-            android:text="Question Paper Title"
-            android:textAppearance="@style/TextAppearance.ExamForge.BodyLarge"
-            android:textStyle="bold"
-            android:maxLines="1"
-            android:ellipsize="end"
-            app:layout_constraintStart_toEndOf="@id/ivDocIcon"
+            app:layout_constraintStart_toEndOf="@id/flIconContainer"
             app:layout_constraintEnd_toStartOf="@id/ivAction"
-            app:layout_constraintTop_toTopOf="@id/ivDocIcon" />
+            app:layout_constraintTop_toTopOf="@id/flIconContainer"
+            app:layout_constraintBottom_toBottomOf="@id/flIconContainer">
 
-        <TextView
-            android:id="@+id/tvPaperDate"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="8dp"
-            android:text="Date Created"
-            android:textAppearance="@style/TextAppearance.ExamForge.BodySmall"
-            android:textColor="@color/text_secondary"
-            app:layout_constraintStart_toEndOf="@id/ivDocIcon"
-            app:layout_constraintEnd_toStartOf="@id/ivAction"
-            app:layout_constraintTop_toBottomOf="@id/tvPaperTitle" />
+            <TextView
+                android:id="@+id/tvPaperTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Question Paper Title"
+                android:textSize="16sp"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/tvPaperDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Date Created"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
             
         <!-- Action Button (More options or download) -->
         <ImageView
             android:id="@+id/ivAction"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:src="@android:drawable/ic_menu_more"
-            android:padding="8dp"
+            android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="More Options"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:tint="@color/text_secondary" />
+            app:tint="@color/primary_dark" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -110,9 +110,14 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:background="@color/white"
         app:headerLayout="@layout/nav_header"
         app:itemTextColor="@color/text_primary"
         app:itemIconTint="@color/primary"
+        app:itemTextAppearance="@style/TextAppearance.ExamForge.BodyMedium"
+        app:itemIconPadding="16dp"
+        app:itemHorizontalPadding="24dp"
+        app:itemVerticalPadding="8dp"
         app:menu="@menu/menu_nav_drawer" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
