@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
@@ -13,7 +14,9 @@ import java.io.File;
 public class PreviewActivity extends AppCompatActivity {
 
     private Button btnViewPDF, btnBackToHistory;
+    private TextView tvPreviewLabel;
     private String pdfFilePath;
+    private String pdfTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,7 +25,15 @@ public class PreviewActivity extends AppCompatActivity {
 
         btnViewPDF = findViewById(R.id.btnViewPDF);
         btnBackToHistory = findViewById(R.id.btnBackToHistory);
-        pdfFilePath = getIntent().getStringExtra("pdfFilePath");
+        tvPreviewLabel = findViewById(R.id.tvPreviewLabel);
+        
+        // Get file path from intent extras
+        pdfFilePath = getIntent().getStringExtra("filePath");
+        pdfTitle = getIntent().getStringExtra("title");
+        
+        if (pdfTitle != null) {
+            tvPreviewLabel.setText("Your Question Paper \"" + pdfTitle + "\" is Ready!");
+        }
 
         btnViewPDF.setOnClickListener(v -> {
             File pdfFile = new File(pdfFilePath);

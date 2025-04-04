@@ -126,7 +126,7 @@
             android:id="@+id/tvCredits"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="© 2023 ExamForge. All rights reserved."
+            android:text="© 2025 ExamForge. All rights reserved."
             android:textAppearance="@style/TextAppearance.ExamForge.BodySmall"
             android:textColor="@color/text_secondary"
             android:layout_marginTop="32dp"

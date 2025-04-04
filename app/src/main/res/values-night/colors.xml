@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Text colors -->
+    <color name="text_primary">@color/dark_text_primary</color>
+    <color name="text_secondary">@color/dark_text_secondary</color>
+    <color name="text_hint">#757575</color>
+    
+    <!-- Background colors -->
+    <color name="background_light">@color/dark_background</color>
+    <color name="card_background">@color/dark_card_background</color>
+    <color name="surface">@color/dark_surface</color>
+    
+    <!-- Theme colors -->
+    <color name="primary">@color/primary_dark_mode</color>
+    <color name="primary_light">@color/primary_light_dark_mode</color>
+    <color name="primary_dark">@color/primary_dark_dark_mode</color>
+    
+    <color name="accent">@color/accent_dark_mode</color>
+    <color name="accent_light">@color/accent_light_dark_mode</color>
+    <color name="accent_dark">@color/accent_dark_dark_mode</color>
+</resources> 

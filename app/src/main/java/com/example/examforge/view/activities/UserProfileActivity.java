@@ -1,33 +1,93 @@
 package com.example.examforge.view.activities;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.Observer;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.examforge.R;
+import com.example.examforge.model.User;
+import com.example.examforge.repository.UserRepository;
+import com.example.examforge.utils.FirebaseManager;
+import com.example.examforge.utils.ImageStorageManager;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
+import com.google.android.material.imageview.ShapeableImageView;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import java.io.File;
 
 public class UserProfileActivity extends AppCompatActivity {
 
+    private static final int PERMISSION_REQUEST_CODE = 123;
+    private static final String TAG = "UserProfileActivity";
+
     private EditText etName, etEmail;
-    private ImageView ivProfilePicture;
-    private Button btnSave, btnEdit, btnLogout;
+    private ShapeableImageView ivProfilePicture;
+    private Button btnSave, btnEdit, btnLogout, btnChangePhoto;
 
     private FirebaseAuth mAuth;
-    private DatabaseReference userRef;
+    private Uri selectedImageUri;
+    private String userId;
+    private User localUserProfile;
+    private UserRepository userRepository;
+    
+    private final ActivityResultLauncher<Intent> pickImageLauncher = registerForActivityResult(
+        new ActivityResultContracts.StartActivityForResult(),
+        result -> {
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                selectedImageUri = result.getData().getData();
+                if (selectedImageUri != null) {
+                    // Don't directly set the URI to the ImageView, as it might be a content:// URI
+                    // that requires permissions to access directly
+                    Glide.with(this)
+                        .load(selectedImageUri)
+                        .skipMemoryCache(true)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .placeholder(R.drawable.ic_launcher_foreground)
+                        .error(R.drawable.ic_launcher_foreground)
+                        .into(ivProfilePicture);
+                    
+                    saveProfilePicture();
+                }
+            }
+        }
+    );
+    
+    private final ActivityResultLauncher<String[]> requestPermissionLauncher = registerForActivityResult(
+        new ActivityResultContracts.RequestMultiplePermissions(),
+        permissions -> {
+            boolean allGranted = true;
+            for (Boolean granted : permissions.values()) {
+                if (!granted) {
+                    allGranted = false;
+                    break;
+                }
+            }
+            
+            if (allGranted) {
+                openGalleryWithPermissions();
+            } else {
+                Toast.makeText(this, "Permission denied. Cannot access images.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,12 +95,15 @@ public class UserProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_user_profile);
 
         mAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
+        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+        if (firebaseUser == null) {
             startActivity(new Intent(UserProfileActivity.this, LoginActivity.class));
             finish();
             return;
         }
+
+        userId = firebaseUser.getUid();
+        userRepository = new UserRepository(this);
 
         // Initialize UI elements
         etName = findViewById(R.id.etName);
@@ -49,14 +112,18 @@ public class UserProfileActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.btnSave);
         btnEdit = findViewById(R.id.btnEdit);
         btnLogout = findViewById(R.id.btnLogout);
+        btnChangePhoto = findViewById(R.id.btnChangePhoto);
 
-        etEmail.setText(currentUser.getEmail());
+        etEmail.setText(firebaseUser.getEmail());
         etEmail.setEnabled(false);
 
-        String uid = currentUser.getUid();
-        userRef = FirebaseDatabase.getInstance().getReference("users").child(uid);
-
         loadUserData();
+        
+        ivProfilePicture.setOnClickListener(v -> checkAndRequestPermissions());
+        
+        if (btnChangePhoto != null) {
+            btnChangePhoto.setOnClickListener(v -> checkAndRequestPermissions());
+        }
 
         btnEdit.setOnClickListener(view -> {
             etName.setEnabled(true);
@@ -79,39 +146,175 @@ public class UserProfileActivity extends AppCompatActivity {
             finish();
         });
     }
-
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reload user data when returning to this activity
+        loadUserData();
+    }
+    
     private void loadUserData() {
-        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        // Load name from Firebase
+        FirebaseManager.getUserName(userId, new FirebaseManager.OnUserDataCallback() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    String name = dataSnapshot.child("name").getValue(String.class);
-                    // No need to load profile picture, we use a default image
-                    if (name != null) {
-                        etName.setText(name);
-                    }
-                    // Set default profile picture
-                    ivProfilePicture.setImageResource(R.drawable.ic_launcher_foreground);
+            public void onUserNameLoaded(String name) {
+                if (name != null) {
+                    etName.setText(name);
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(UserProfileActivity.this, "Error loading profile", Toast.LENGTH_SHORT).show();
+            public void onUserNameLoadFailed(String errorMessage) {
+                Toast.makeText(UserProfileActivity.this, "Failed to load name: " + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
+        
+        // Load profile picture from Room
+        Log.d(TAG, "Loading profile picture for user: " + userId);
+        userRepository.getUserById(userId).observe(this, user -> {
+            localUserProfile = user;
+            if (user != null) {
+                Log.d(TAG, "User found in database: " + user.getUserId());
+                if (user.getProfilePicPath() != null) {
+                    Log.d(TAG, "Loading profile image from path: " + user.getProfilePicPath());
+                    // Check if file exists
+                    File imageFile = new File(user.getProfilePicPath());
+                    if (imageFile.exists()) {
+                        Log.d(TAG, "Image file exists, loading with Glide");
+                        
+                        // Clear any previous image loading
+                        Glide.with(UserProfileActivity.this).clear(ivProfilePicture);
+                        
+                        // Load the image with cache disabled
+                        Glide.with(UserProfileActivity.this)
+                            .load(imageFile)
+                            .skipMemoryCache(true)
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .placeholder(R.drawable.ic_launcher_foreground)
+                            .error(R.drawable.ic_launcher_foreground)
+                            .into(ivProfilePicture);
+                    } else {
+                        Log.e(TAG, "Image file does not exist at path: " + user.getProfilePicPath());
+                        ivProfilePicture.setImageResource(R.drawable.ic_launcher_foreground);
+                    }
+                } else {
+                    Log.d(TAG, "User has no profile picture path");
+                    ivProfilePicture.setImageResource(R.drawable.ic_launcher_foreground);
+                }
+            } else {
+                Log.d(TAG, "No user found in local database for userId: " + userId);
+                ivProfilePicture.setImageResource(R.drawable.ic_launcher_foreground);
             }
         });
     }
-
+    
     private void saveUserData(String name) {
-        userRef.child("name").setValue(name)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(UserProfileActivity.this, "Profile updated", Toast.LENGTH_SHORT).show();
-                    etName.setEnabled(false);
-                    btnSave.setVisibility(View.GONE);
-                    btnEdit.setVisibility(View.VISIBLE);
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(UserProfileActivity.this, "Failed to update profile", Toast.LENGTH_SHORT).show();
-                });
+        // Save name to Firebase
+        FirebaseManager.saveUserName(
+            userId, 
+            name,
+            aVoid -> {
+                etName.setEnabled(false);
+                btnSave.setVisibility(View.GONE);
+                btnEdit.setVisibility(View.VISIBLE);
+                Toast.makeText(UserProfileActivity.this, "Profile updated", Toast.LENGTH_SHORT).show();
+            },
+            e -> Toast.makeText(UserProfileActivity.this, "Failed to update profile: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+        );
+    }
+    
+    private void checkAndRequestPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+ uses READ_MEDIA_IMAGES 
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(new String[]{Manifest.permission.READ_MEDIA_IMAGES});
+            } else {
+                openGalleryWithPermissions();
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Android 10-12 doesn't need READ_EXTERNAL_STORAGE for MediaStore
+            openGalleryWithPermissions();
+        } else {
+            // Android 9 and below needs READ_EXTERNAL_STORAGE
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE});
+            } else {
+                openGalleryWithPermissions();
+            }
+        }
+    }
+    
+    private void openGalleryWithPermissions() {
+        // Use ACTION_GET_CONTENT instead of Photo Picker for better compatibility
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        
+        try {
+            pickImageLauncher.launch(Intent.createChooser(intent, "Select Picture"));
+        } catch (Exception e) {
+            Toast.makeText(this, "Error opening gallery: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void saveProfilePicture() {
+        if (selectedImageUri == null) return;
+        
+        Toast.makeText(UserProfileActivity.this, "Saving profile picture...", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "Saving profile picture for user: " + userId);
+        
+        // Delete old profile picture if it exists
+        if (localUserProfile != null && localUserProfile.getProfilePicPath() != null) {
+            Log.d(TAG, "Deleting old profile picture: " + localUserProfile.getProfilePicPath());
+            ImageStorageManager.deleteImageFromInternalStorage(localUserProfile.getProfilePicPath());
+        }
+        
+        // Save new image to local storage
+        String imagePath = ImageStorageManager.saveImageToInternalStorage(this, selectedImageUri, userId);
+        
+        if (imagePath != null) {
+            Log.d(TAG, "Image saved successfully at: " + imagePath);
+            // Update user with new profile picture path in Room
+            if (localUserProfile == null) {
+                Log.d(TAG, "Creating new user profile in database");
+                localUserProfile = new User(userId, imagePath);
+                userRepository.insert(localUserProfile);
+            } else {
+                Log.d(TAG, "Updating existing user profile in database");
+                localUserProfile.setProfilePicPath(imagePath);
+                userRepository.update(localUserProfile);
+            }
+            
+            // Verify the file exists before loading
+            File imageFile = new File(imagePath);
+            if (imageFile.exists()) {
+                Log.d(TAG, "Loading newly saved image with Glide");
+                
+                // Clear any previous image loading
+                Glide.with(UserProfileActivity.this).clear(ivProfilePicture);
+                
+                // Immediately update the ImageView with the new image
+                Glide.with(UserProfileActivity.this)
+                    .load(imageFile)  // Load from File instead of path String
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .error(R.drawable.ic_launcher_foreground)
+                    .skipMemoryCache(true)  // Skip memory cache to ensure fresh loading
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)  // Skip disk cache too
+                    .into(ivProfilePicture);
+                
+                // Force Home activity to refresh next time it's visible
+                Intent refreshIntent = new Intent("com.example.examforge.PROFILE_UPDATED");
+                LocalBroadcastManager.getInstance(UserProfileActivity.this).sendBroadcast(refreshIntent);
+                
+                Toast.makeText(UserProfileActivity.this, "Profile picture updated", Toast.LENGTH_SHORT).show();
+            } else {
+                Log.e(TAG, "Saved image file doesn't exist: " + imagePath);
+                Toast.makeText(UserProfileActivity.this, "Error: Saved file not found", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Log.e(TAG, "Failed to save profile picture");
+            Toast.makeText(UserProfileActivity.this, "Failed to save profile picture", Toast.LENGTH_SHORT).show();
+        }
     }
 }

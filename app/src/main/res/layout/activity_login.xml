@@ -97,20 +97,9 @@
                 android:id="@+id/tvSignUpLink"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Don't have an account? "
+                android:text="Don't have an account? Sign Up"
                 android:textAppearance="@style/TextAppearance.ExamForge.BodyMedium"
                 android:layout_marginTop="16dp"
-                android:layout_gravity="center_horizontal"/>
-                
-            <TextView
-                android:id="@+id/tvSignUp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sign Up"
-                android:textAppearance="@style/TextAppearance.ExamForge.BodyMedium"
-                android:textColor="@color/accent"
-                android:textStyle="bold"
-                android:layout_marginTop="4dp"
                 android:layout_gravity="center_horizontal"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

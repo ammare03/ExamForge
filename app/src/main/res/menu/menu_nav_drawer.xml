@@ -16,6 +16,12 @@
             android:title="About"
             android:icon="@android:drawable/ic_menu_info_details"
             app:iconTint="@color/primary" />
+            
+        <item
+            android:id="@+id/nav_share"
+            android:title="Share App"
+            android:icon="@android:drawable/ic_menu_share"
+            app:iconTint="@color/primary" />
     </group>
     
     <group android:id="@+id/menu_bottom" android:checkableBehavior="single">

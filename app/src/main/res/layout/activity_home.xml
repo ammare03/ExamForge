@@ -19,23 +19,8 @@
             android:layout_height="wrap_content"
             android:background="@color/primary">
 
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                style="@style/Widget.ExamForge.Toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:title="ExamForge">
-
-                <!-- Info button on the right -->
-                <ImageView
-                    android:id="@+id/ivInfo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:padding="12dp"
-                    android:src="@android:drawable/ic_menu_info_details"
-                    app:tint="@color/white" />
-            </androidx.appcompat.widget.Toolbar>
+            <include layout="@layout/custom_toolbar" />
+            
         </com.google.android.material.appbar.AppBarLayout>
 
         <!-- Content Frame: RecyclerView for displaying history -->

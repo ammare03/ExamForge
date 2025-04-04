@@ -108,11 +108,12 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
 
                             // Navigate to PreviewActivity.
                             Intent intent = new Intent(CreateQuestionPaperActivity.this, PreviewActivity.class);
-                            intent.putExtra("pdfFilePath", pdfFile.getAbsolutePath());
+                            intent.putExtra("filePath", pdfFile.getAbsolutePath());
+                            intent.putExtra("title", finalUserFileName);
                             startActivity(intent);
                         } catch (Exception e) {
                             e.printStackTrace();
-                            Toast.makeText(CreateQuestionPaperActivity.this, "Error generating PDF", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(CreateQuestionPaperActivity.this, "Error generating PDF: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
                 }

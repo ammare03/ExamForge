@@ -36,4 +36,21 @@
     <color name="buttonColor">@color/accent</color>
     <color name="purple_700">#512DA8</color>
     <color name="teal_200">#009688</color>
+    
+    <!-- Dark mode colors -->
+    <color name="primary_dark_mode">#5C6BC0</color>
+    <color name="primary_light_dark_mode">#8E99F3</color>
+    <color name="primary_dark_dark_mode">#26418F</color>
+    
+    <color name="accent_dark_mode">#FFB74D</color>
+    <color name="accent_light_dark_mode">#FFD180</color>
+    <color name="accent_dark_dark_mode">#C88719</color>
+    
+    <color name="dark_background">#121212</color>
+    <color name="dark_surface">#1E1E1E</color>
+    <color name="dark_card_background">#2C2C2C</color>
+    
+    <color name="dark_text_primary">#E0E0E0</color>
+    <color name="dark_text_secondary">#A0A0A0</color>
+    <color name="dark_on_surface">#E0E0E0</color>
 </resources>

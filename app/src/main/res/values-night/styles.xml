@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Toolbar Style for dark mode -->
+    <style name="Widget.ExamForge.Toolbar" parent="Widget.Material3.Toolbar">
+        <item name="android:background">@color/primary_dark_mode</item>
+        <item name="titleTextColor">@color/white</item>
+        <item name="subtitleTextColor">@color/white</item>
+        <item name="colorControlNormal">@color/white</item>
+    </style>
+</resources> 

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/toolbar"
+    style="@style/Widget.ExamForge.Toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    app:title="">
+
+    <!-- Custom title layout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="96dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        
+        <!-- App icon -->
+        <ImageView
+            android:id="@+id/ivToolbarLogo"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/app_logo"
+            android:contentDescription="App logo" />
+            
+        <!-- Title and subtitle -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:orientation="vertical">
+            
+            <TextView
+                android:id="@+id/tvToolbarTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ExamForge"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+                
+            <TextView
+                android:id="@+id/tvToolbarSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Create Question Papers"
+                android:textColor="@color/white"
+                android:alpha="0.7"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Theme toggle button -->
+    <ImageView
+        android:id="@+id/ivThemeToggle"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="end"
+        android:layout_marginEnd="56dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_dark_mode"
+        android:contentDescription="Toggle dark mode"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        app:tint="@color/white"
+        android:visibility="visible" />
+
+    <!-- Info button on the right -->
+    <ImageView
+        android:id="@+id/ivInfo"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="end"
+        android:layout_marginEnd="8dp"
+        android:padding="8dp"
+        android:src="@android:drawable/ic_menu_info_details"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        app:tint="@color/white" />
+</androidx.appcompat.widget.Toolbar> 

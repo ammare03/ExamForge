@@ -131,20 +131,9 @@
                 android:id="@+id/tvLoginLink"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Already have an account? "
+                android:text="Already have an account? Login"
                 android:textAppearance="@style/TextAppearance.ExamForge.BodyMedium"
                 android:layout_marginTop="16dp"
-                android:layout_gravity="center_horizontal"/>
-                
-            <TextView
-                android:id="@+id/tvLogin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Login"
-                android:textAppearance="@style/TextAppearance.ExamForge.BodyMedium"
-                android:textColor="@color/accent"
-                android:textStyle="bold"
-                android:layout_marginTop="4dp"
                 android:layout_gravity="center_horizontal"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

@@ -2,4 +2,6 @@
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Grant access to the public Documents directory -->
     <external-path name="documents" path="Documents/" />
+    <!-- Grant access to internal files for PDFs -->
+    <files-path name="pdfs" path="pdfs/" />
 </paths>

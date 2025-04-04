@@ -15,7 +15,10 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class SplashActivity extends AppCompatActivity {
 
-    private static final long SPLASH_DELAY = 3000; // 3 seconds delay
+    private static final long SPLASH_DELAY = 3000; // 3 seconds total delay
+    private static final long LOGO_DISPLAY_TIME = 2000; // 2 seconds for logo display
+    private static final long PROGRESS_DISPLAY_TIME = 1000; // 1 second for progress bar
+    
     private View ivLogo;
     private View progressBar;
     private View tvAppName;
@@ -33,23 +36,30 @@ public class SplashActivity extends AppCompatActivity {
         Animation fadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out);
         Animation fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in);
 
-        // Start fade-out on the logo
-        ivLogo.startAnimation(fadeOut);
-        fadeOut.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) { }
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                ivLogo.setVisibility(View.INVISIBLE);
-                progressBar.setVisibility(View.VISIBLE);
-                progressBar.startAnimation(fadeIn);
-            }
-            @Override
-            public void onAnimationRepeat(Animation animation) { }
-        });
-
+        // Start with logo visible and progress bar invisible
+        ivLogo.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
+        
         // Animate the app name fade-in
         tvAppName.startAnimation(fadeIn);
+
+        // Show the logo for LOGO_DISPLAY_TIME before showing progress bar
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            // Start fade-out on the logo
+            ivLogo.startAnimation(fadeOut);
+            fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) { }
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    // Logo fades out but stays visible with lower opacity
+                    progressBar.setVisibility(View.VISIBLE);
+                    progressBar.startAnimation(fadeIn);
+                }
+                @Override
+                public void onAnimationRepeat(Animation animation) { }
+            });
+        }, LOGO_DISPLAY_TIME);
 
         // After the delay, check authentication and navigate accordingly
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
