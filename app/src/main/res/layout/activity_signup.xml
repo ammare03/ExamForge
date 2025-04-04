@@ -25,7 +25,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Profile Image Placeholder (Disabled) -->
+            <!-- Profile Image Selector -->
             <ImageView
                 android:id="@+id/ivProfilePicture"
                 android:layout_width="80dp"
@@ -34,8 +34,7 @@
                 android:contentDescription="Profile Picture"
                 android:layout_gravity="center_horizontal"
                 android:background="@drawable/circle_background"
-                android:padding="4dp"
-                android:visibility="gone" /> <!-- Hidden since profile picture isn't being set -->
+                android:padding="4dp"/>
 
             <!-- Full Name Input -->
             <com.google.android.material.textfield.TextInputLayout
@@ -44,7 +43,7 @@
                 android:hint="Full Name"
                 android:layout_marginTop="16dp">
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etName"
+                    android:id="@+id/etFullName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
@@ -88,7 +87,6 @@
                     android:inputType="textPassword"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Sign Up Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSignUp"
                 android:layout_width="match_parent"
@@ -97,15 +95,6 @@
                 android:layout_marginTop="24dp"
                 app:backgroundTint="@color/purple_700"/>
 
-            <!-- Progress Bar (Invisible until sign-up is in progress) -->
-            <ProgressBar
-                android:id="@+id/progressBar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:visibility="gone"/>
-
-            <!-- Sign In Link -->
             <TextView
                 android:id="@+id/tvLoginLink"
                 android:layout_width="wrap_content"
@@ -116,5 +105,4 @@
                 android:layout_gravity="center_horizontal"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

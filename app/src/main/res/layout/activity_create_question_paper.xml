@@ -48,6 +48,19 @@
                     android:textColor="@android:color/darker_gray"
                     android:layout_marginTop="8dp" />
 
+                <!-- EditText for File Name -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilFileName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter File Name"
+                    android:layout_marginTop="16dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etFileName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+
                 <!-- Marks Input -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilMarks"
@@ -87,7 +100,7 @@
                 <!-- Spinner for Question Type -->
                 <Spinner
                     android:id="@+id/spinnerQuestionType"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toBottomOf="@id/tvQuestionTypeLabel"
                     app:layout_constraintStart_toStartOf="parent"

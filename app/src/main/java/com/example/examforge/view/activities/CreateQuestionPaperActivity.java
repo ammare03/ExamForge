@@ -29,7 +29,7 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
     private static final int PICK_PDF_REQUEST = 1;
     private Button btnChoosePDF, btnSubmit;
     private TextView tvFileName;
-    private EditText etMarks, etAdditionalParams;
+    private EditText etMarks, etAdditionalParams, etFileName;
     private Spinner spinnerQuestionType;
     private Uri pdfUri;
     private String extractedText = "";
@@ -46,6 +46,7 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
         tvFileName = findViewById(R.id.tvFileName);
         etMarks = findViewById(R.id.etMarks);
         etAdditionalParams = findViewById(R.id.etAdditionalParams);
+        etFileName = findViewById(R.id.etFileName);
         spinnerQuestionType = findViewById(R.id.spinnerQuestionType);
 
         // Populate spinner with question types.
@@ -75,11 +76,19 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
             }
             String questionType = selectedItem.toString();
 
+            // Get the file name entered by the user
+            String userFileName = etFileName.getText().toString().trim();
+            if (userFileName.isEmpty()) {
+                userFileName = "GeneratedQuestionPaper"; // Use a default name if not provided by the user
+            }
+            userFileName = userFileName + ".pdf"; // Ensure the file name has a .pdf extension
+
             Toast.makeText(CreateQuestionPaperActivity.this, "Generating question paper...", Toast.LENGTH_SHORT).show();
 
             // Use ChatGPTManager to generate question paper.
             ChatGPTManager chatGPTManager = new ChatGPTManager();
             // Chunk size of 1000 characters (adjust as needed)
+            String finalUserFileName = userFileName;
             chatGPTManager.generateQuestionPaper(extractedText, 1000, marks, questionType, additionalParams, new ChatGPTManager.ChatGPTCallback() {
                 @Override
                 public void onComplete(String combinedResponse) {
@@ -87,10 +96,10 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         try {
                             File pdfFile = PDFGenerator.generatePDF(CreateQuestionPaperActivity.this,
-                                    finalOutput, "GeneratedQuestionPaper.pdf");
+                                    finalOutput, finalUserFileName);
                             // Save metadata into Room database.
                             QuestionPaperHistoryRepository repository = new QuestionPaperHistoryRepository(CreateQuestionPaperActivity.this);
-                            QuestionPaper paper = new QuestionPaper("Generated Question Paper", pdfFile.getAbsolutePath(), System.currentTimeMillis());
+                            QuestionPaper paper = new QuestionPaper(finalUserFileName, pdfFile.getAbsolutePath(), System.currentTimeMillis());
                             repository.insert(paper);
 
                             // Navigate to PreviewActivity.
