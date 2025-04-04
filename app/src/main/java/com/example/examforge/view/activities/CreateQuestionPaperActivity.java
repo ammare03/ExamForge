@@ -8,7 +8,6 @@ import android.provider.OpenableColumns;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
@@ -18,6 +17,7 @@ import com.example.examforge.manager.ChatGPTManager;
 import com.example.examforge.model.QuestionPaper;
 import com.example.examforge.repository.QuestionPaperHistoryRepository;
 import com.example.examforge.utils.PDFGenerator;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader;
 import com.tom_roush.pdfbox.pdmodel.PDDocument;
@@ -31,7 +31,7 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
     private Button btnChoosePDF, btnSubmit;
     private TextView tvFileName;
     private EditText etMarks, etAdditionalParams, etFileName;
-    private Spinner spinnerQuestionType;
+    private MaterialAutoCompleteTextView spinnerQuestionType;
     private Uri pdfUri;
     private String extractedText = "";
 
@@ -50,12 +50,16 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
         etFileName = findViewById(R.id.etFileName);
         spinnerQuestionType = findViewById(R.id.spinnerQuestionType);
 
-        // Populate spinner with question types.
+        // Populate dropdown with question types
         String[] questionTypes = {"MCQ", "Subjective", "Mixed"};
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, questionTypes);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerQuestionType.setAdapter(spinnerAdapter);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                questionTypes);
+        spinnerQuestionType.setAdapter(adapter);
+        
+        // Set default selection
+        spinnerQuestionType.setText(questionTypes[0], false);
 
         btnChoosePDF.setOnClickListener(v -> openFileChooser());
 
@@ -70,12 +74,11 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
                 return;
             }
             String additionalParams = etAdditionalParams.getText().toString().trim();
-            Object selectedItem = spinnerQuestionType.getSelectedItem();
-            if (selectedItem == null) {
+            String questionType = spinnerQuestionType.getText().toString();
+            if (questionType.isEmpty()) {
                 Toast.makeText(CreateQuestionPaperActivity.this, "Please select a question type", Toast.LENGTH_SHORT).show();
                 return;
             }
-            String questionType = selectedItem.toString();
 
             // Get the file name entered by the user
             String userFileName = etFileName.getText().toString().trim();

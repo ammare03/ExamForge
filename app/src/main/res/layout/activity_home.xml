@@ -2,10 +2,11 @@
 <androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black">
+    android:background="@color/background_light">
 
     <!-- Main Content -->
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -16,15 +17,14 @@
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            android:background="@color/black">
+            android:background="@color/primary">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
+                style="@style/Widget.ExamForge.Toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:title="">
+                app:title="ExamForge">
 
                 <!-- Info button on the right -->
                 <ImageView
@@ -32,8 +32,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
-                    android:padding="8dp"
-                    android:src="@android:drawable/ic_menu_info_details" />
+                    android:padding="12dp"
+                    android:src="@android:drawable/ic_menu_info_details"
+                    app:tint="@color/white" />
             </androidx.appcompat.widget.Toolbar>
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -44,22 +45,62 @@
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+            <!-- Empty state view (initially visible) -->
+            <LinearLayout
+                android:id="@+id/emptyStateContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:src="@drawable/app_logo"
+                    android:alpha="0.7"
+                    android:contentDescription="Empty state illustration" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="No Question Papers Yet"
+                    android:textAppearance="@style/TextAppearance.ExamForge.HeadlineSmall"
+                    android:textColor="@color/text_primary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginHorizontal="32dp"
+                    android:text="Tap the + button to create your first question paper"
+                    android:textAppearance="@style/TextAppearance.ExamForge.BodyMedium"
+                    android:textColor="@color/text_secondary"
+                    android:textAlignment="center" />
+            </LinearLayout>
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:clipToPadding="false"
                 android:padding="16dp" />
         </FrameLayout>
 
         <!-- FloatingActionButton for creating a new question paper -->
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/fabAdd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
-            android:src="@android:drawable/ic_input_add"
-            app:backgroundTint="@color/purple_700" />
+            android:text="Create"
+            android:textColor="@color/white"
+            app:icon="@android:drawable/ic_input_add"
+            app:iconTint="@color/white"
+            app:backgroundTint="@color/accent" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
@@ -70,6 +111,8 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header"
+        app:itemTextColor="@color/text_primary"
+        app:itemIconTint="@color/primary"
         app:menu="@menu/menu_nav_drawer" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

@@ -1,10 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="startColor">#FF6F00</color>
-    <color name="endColor">#FFA000</color>
-    <color name="buttonColor">#FFA000</color>
+    
+    <!-- Primary colors -->
+    <color name="primary">#3F51B5</color>
+    <color name="primary_light">#757DE8</color>
+    <color name="primary_dark">#002984</color>
+    
+    <!-- Accent colors -->
+    <color name="accent">#FF9800</color>
+    <color name="accent_light">#FFC947</color>
+    <color name="accent_dark">#C66900</color>
+    
+    <!-- Text colors -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_hint">#BDBDBD</color>
+    
+    <!-- Background colors -->
+    <color name="background_light">#F5F5F5</color>
+    <color name="card_background">#FFFFFF</color>
+    <color name="surface">#FFFFFF</color>
+    
+    <!-- Status colors -->
+    <color name="success">#4CAF50</color>
+    <color name="info">#2196F3</color>
+    <color name="warning">#FFC107</color>
+    <color name="error">#F44336</color>
+    
+    <!-- Legacy colors (kept for backward compatibility) -->
+    <color name="startColor">@color/accent_dark</color>
+    <color name="endColor">@color/accent</color>
+    <color name="buttonColor">@color/accent</color>
     <color name="purple_700">#512DA8</color>
     <color name="teal_200">#009688</color>
 </resources>
