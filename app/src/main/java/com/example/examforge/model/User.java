@@ -9,7 +9,7 @@ public class User {
     @PrimaryKey
     @NonNull
     private String userId;
-    private String profilePicPath; // Local path to the profile picture
+    private String profilePicPath; 
 
     public User(@NonNull String userId, String profilePicPath) {
         this.userId = userId;

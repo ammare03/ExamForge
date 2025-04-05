@@ -54,8 +54,8 @@ public class UserProfileActivity extends AppCompatActivity {
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                 selectedImageUri = result.getData().getData();
                 if (selectedImageUri != null) {
-                    // Don't directly set the URI to the ImageView, as it might be a content:// URI
-                    // that requires permissions to access directly
+                    
+                    
                     Glide.with(this)
                         .load(selectedImageUri)
                         .skipMemoryCache(true)
@@ -105,7 +105,7 @@ public class UserProfileActivity extends AppCompatActivity {
         userId = firebaseUser.getUid();
         userRepository = new UserRepository(this);
 
-        // Initialize UI elements
+        
         etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
         ivProfilePicture = findViewById(R.id.ivProfilePicture);
@@ -150,12 +150,12 @@ public class UserProfileActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Reload user data when returning to this activity
+        
         loadUserData();
     }
     
     private void loadUserData() {
-        // Load name from Firebase
+        
         FirebaseManager.getUserName(userId, new FirebaseManager.OnUserDataCallback() {
             @Override
             public void onUserNameLoaded(String name) {
@@ -170,18 +170,18 @@ public class UserProfileActivity extends AppCompatActivity {
             }
         });
         
-        // Load profile picture from Room
+        
         userRepository.getUserById(userId).observe(this, user -> {
             localUserProfile = user;
             if (user != null) {
                 if (user.getProfilePicPath() != null) {
-                    // Check if file exists
+                    
                     File imageFile = new File(user.getProfilePicPath());
                     if (imageFile.exists()) {
-                        // Clear any previous image loading
+                        
                         Glide.with(UserProfileActivity.this).clear(ivProfilePicture);
                         
-                        // Load the image with cache disabled
+                        
                         Glide.with(UserProfileActivity.this)
                             .load(imageFile)
                             .skipMemoryCache(true)
@@ -202,7 +202,7 @@ public class UserProfileActivity extends AppCompatActivity {
     }
     
     private void saveUserData(String name) {
-        // Save name to Firebase
+        
         FirebaseManager.saveUserName(
             userId, 
             name,
@@ -218,17 +218,17 @@ public class UserProfileActivity extends AppCompatActivity {
     
     private void checkAndRequestPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+ uses READ_MEDIA_IMAGES 
+            
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissionLauncher.launch(new String[]{Manifest.permission.READ_MEDIA_IMAGES});
             } else {
                 openGalleryWithPermissions();
             }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Android 10-12 doesn't need READ_EXTERNAL_STORAGE for MediaStore
+            
             openGalleryWithPermissions();
         } else {
-            // Android 9 and below needs READ_EXTERNAL_STORAGE
+            
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissionLauncher.launch(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE});
             } else {
@@ -238,7 +238,7 @@ public class UserProfileActivity extends AppCompatActivity {
     }
     
     private void openGalleryWithPermissions() {
-        // Use ACTION_GET_CONTENT instead of Photo Picker for better compatibility
+        
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -255,16 +255,16 @@ public class UserProfileActivity extends AppCompatActivity {
         
         Toast.makeText(UserProfileActivity.this, "Saving profile picture...", Toast.LENGTH_SHORT).show();
         
-        // Delete old profile picture if it exists
+        
         if (localUserProfile != null && localUserProfile.getProfilePicPath() != null) {
             ImageStorageManager.deleteImageFromInternalStorage(localUserProfile.getProfilePicPath());
         }
         
-        // Save new image to local storage
+        
         String imagePath = ImageStorageManager.saveImageToInternalStorage(this, selectedImageUri, userId);
         
         if (imagePath != null) {
-            // Update user with new profile picture path in Room
+            
             if (localUserProfile == null) {
                 localUserProfile = new User(userId, imagePath);
                 userRepository.insert(localUserProfile);
@@ -273,22 +273,22 @@ public class UserProfileActivity extends AppCompatActivity {
                 userRepository.update(localUserProfile);
             }
             
-            // Verify the file exists before loading
+            
             File imageFile = new File(imagePath);
             if (imageFile.exists()) {
-                // Clear any previous image loading
+                
                 Glide.with(UserProfileActivity.this).clear(ivProfilePicture);
                 
-                // Immediately update the ImageView with the new image
+                
                 Glide.with(UserProfileActivity.this)
-                    .load(imageFile)  // Load from File instead of path String
+                    .load(imageFile)  
                     .placeholder(R.drawable.ic_launcher_foreground)
                     .error(R.drawable.ic_launcher_foreground)
-                    .skipMemoryCache(true)  // Skip memory cache to ensure fresh loading
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)  // Skip disk cache too
+                    .skipMemoryCache(true)  
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)  
                     .into(ivProfilePicture);
                 
-                // Force Home activity to refresh next time it's visible
+                
                 Intent refreshIntent = new Intent("com.example.examforge.PROFILE_UPDATED");
                 LocalBroadcastManager.getInstance(UserProfileActivity.this).sendBroadcast(refreshIntent);
                 

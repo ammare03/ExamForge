@@ -29,7 +29,7 @@ public class ChatGPTManager {
         conversationHistory = new ArrayList<>();
     }
 
-    // Helper methods to add messages to conversation history.
+    
     public void addUserMessage(String content) {
         conversationHistory.add(new ChatMessage("user", content));
     }
@@ -57,7 +57,7 @@ public class ChatGPTManager {
         processChunk(chunks, 0, responses, marks, questionType, additionalParams, callback);
     }
 
-    // Recursively processes each chunk using the desired prompt format.
+    
     private void processChunk(List<String> chunks, int index, List<String> responses, String marks, String questionType, String additionalParams, ChatGPTCallback callback) {
         if (index >= chunks.size()) {
             StringBuilder combined = new StringBuilder();
@@ -65,29 +65,29 @@ public class ChatGPTManager {
                 combined.append(resp).append("\n\n");
             }
             callback.onComplete(combined.toString());
-            // Clear conversation history after generation.
+            
             conversationHistory.clear();
             return;
         }
 
-        // Get the current chunk.
+        
         String currentChunk = chunks.get(index);
-        // Build the prompt with the additional parameters.
+        
         String prompt = "Create a question paper with the following content " + currentChunk +
                 " that has " + marks + " marks, is of " + questionType + " type and has these as the additional parameters: " + additionalParams;
 
-        // Log the prompt for debugging.
+        
         Log.d(TAG, "Processing chunk " + index + " with prompt: " + prompt);
 
-        // Add this prompt as a user message to the conversation history.
+        
         addUserMessage(prompt);
 
-        // Build the ChatGPTRequest using the full conversation history.
+        
         ChatGPTRequest request = new ChatGPTRequest(
-                "gpt-4o-mini", // You can change this to "gpt-4" if needed.
+                "gpt-4o-mini", 
                 new ArrayList<>(conversationHistory),
-                300,   // max_tokens
-                0.7    // temperature
+                300,   
+                0.7    
         );
 
         apiService.getChatCompletion(request).enqueue(new Callback<ChatGPTResponse>() {
@@ -97,10 +97,10 @@ public class ChatGPTManager {
                         response.body().getChoices() != null &&
                         !response.body().getChoices().isEmpty()) {
                     String generated = response.body().getChoices().get(0).getMessage().getContent();
-                    // Append assistant's response to conversation history.
+                    
                     addAssistantMessage(generated);
                     responses.add(generated);
-                    // Process the next chunk.
+                    
                     processChunk(chunks, index + 1, responses, marks, questionType, additionalParams, callback);
                 } else {
                     String errorMsg = "Error on chunk " + index + ": " + response.message();
@@ -125,7 +125,7 @@ public class ChatGPTManager {
         });
     }
 
-    // Helper method to split text into chunks of up to chunkSize characters.
+    
     private List<String> splitText(String text, int chunkSize) {
         List<String> chunks = new ArrayList<>();
         int length = text.length();

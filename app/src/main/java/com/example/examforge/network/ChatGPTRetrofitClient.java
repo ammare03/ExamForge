@@ -20,7 +20,7 @@ public class ChatGPTRetrofitClient {
                         @Override
                         public Response intercept(Chain chain) throws IOException {
                             Request original = chain.request();
-                            // Ensure your API key is stored securely in BuildConfig.CHATGPT_API_KEY
+
                             Request request = original.newBuilder()
                                     .header("Authorization", "Bearer " + BuildConfig.CHATGPT_API_KEY)
                                     .method(original.method(), original.body())

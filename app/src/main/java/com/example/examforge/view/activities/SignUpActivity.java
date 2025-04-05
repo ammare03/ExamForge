@@ -45,7 +45,7 @@ public class SignUpActivity extends AppCompatActivity {
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                 selectedImageUri = result.getData().getData();
                 if (selectedImageUri != null) {
-                    // Use Glide to load the image to avoid permission issues
+                    
                     Glide.with(this)
                         .load(selectedImageUri)
                         .placeholder(R.drawable.ic_launcher_foreground)
@@ -114,16 +114,16 @@ public class SignUpActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             FirebaseUser user = mAuth.getCurrentUser();
                             if (user != null) {
-                                // Store user name in Firebase
+                                
                                 FirebaseManager.saveUserName(
                                     user.getUid(), 
                                     name,
                                     aVoid -> {
-                                        // Save profile picture locally if selected
+                                        
                                         if (selectedImageUri != null) {
                                             saveUserProfilePicture(user.getUid());
                                         } else {
-                                            // Navigate to login screen
+                                            
                                             Toast.makeText(SignUpActivity.this, "User created", Toast.LENGTH_SHORT).show();
                                             startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
                                             finish();
@@ -148,17 +148,17 @@ public class SignUpActivity extends AppCompatActivity {
     
     private void checkAndRequestPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+ uses READ_MEDIA_IMAGES 
+            
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissionLauncher.launch(new String[]{Manifest.permission.READ_MEDIA_IMAGES});
             } else {
                 openGalleryWithPermissions();
             }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Android 10-12 doesn't need READ_EXTERNAL_STORAGE for MediaStore
+            
             openGalleryWithPermissions();
         } else {
-            // Android 9 and below needs READ_EXTERNAL_STORAGE
+            
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissionLauncher.launch(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE});
             } else {
@@ -168,7 +168,7 @@ public class SignUpActivity extends AppCompatActivity {
     }
     
     private void openGalleryWithPermissions() {
-        // Use ACTION_GET_CONTENT instead of Photo Picker for better compatibility
+        
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -181,14 +181,14 @@ public class SignUpActivity extends AppCompatActivity {
     }
     
     private void saveUserProfilePicture(String userId) {
-        // Show progress
+        
         Toast.makeText(SignUpActivity.this, "Saving profile picture...", Toast.LENGTH_SHORT).show();
         
-        // Save image to local storage
+        
         String imagePath = ImageStorageManager.saveImageToInternalStorage(this, selectedImageUri, userId);
         
         if (imagePath != null) {
-            // Create and save user profile picture path in Room
+            
             User user = new User(userId, imagePath);
             userRepository.insert(user);
             
@@ -196,7 +196,7 @@ public class SignUpActivity extends AppCompatActivity {
             startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
             finish();
         } else {
-            // Failed to save image, proceed anyway
+            
             Toast.makeText(this, "Could not save profile picture, but account was created", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
             finish();

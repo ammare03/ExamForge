@@ -74,9 +74,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // Apply saved theme before setting content view
+
         ThemeManager.applyTheme(this);
-        
+
         setContentView(R.layout.activity_home);
 
         mAuth = FirebaseAuth.getInstance();
@@ -91,7 +91,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         noResultsContainer = findViewById(R.id.noResultsContainer);
         tvNoResultsQuery = findViewById(R.id.tvNoResultsQuery);
 
-        // Initialize the profile picture reference
+
         View headerView = navigationView.getHeaderView(0);
         ivNavUserPhoto = headerView.findViewById(R.id.ivNavUserPhoto);
 
@@ -101,20 +101,20 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Set info button click listener
+
         ImageView ivInfo = toolbar.findViewById(R.id.ivInfo);
         if (ivInfo != null) {
             ivInfo.setOnClickListener(v -> startActivity(new Intent(HomeActivity.this, AboutActivity.class)));
         }
-        
-        // Setup theme toggle button - must be after setSupportActionBar
+
+
         setupThemeToggle();
 
         navigationView.setNavigationItemSelectedListener(this);
 
         loadUserProfileInNavHeader();
 
-        // Register for profile updates
+
         profileUpdateReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -123,25 +123,25 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             }
         };
 
-        // Register with LocalBroadcastManager instead of system broadcast
+
         LocalBroadcastManager.getInstance(this).registerReceiver(
-            profileUpdateReceiver, 
+            profileUpdateReceiver,
             new IntentFilter("com.example.examforge.PROFILE_UPDATED")
         );
 
-        // Initialize adapter with empty list
+
         allQuestionPapers = new ArrayList<>();
         adapter = new QuestionPaperAdapter(new ArrayList<>());
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
-        // Setup search view
+
         setupSearchView();
 
         historyRepository = new QuestionPaperHistoryRepository(this);
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            // Get only this user's question papers
+
             historyRepository.getQuestionPapersForUser(currentUser.getUid()).observe(this, questionPapers -> {
                 if (questionPapers != null && !questionPapers.isEmpty()) {
                     allQuestionPapers = new ArrayList<>(questionPapers);
@@ -157,19 +157,19 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             });
         }
 
-        // Setup swipe to delete
+
         setupItemTouchHelper();
 
         fabAdd.setOnClickListener(v -> {
-            // Navigate to create question paper screen
+
             startActivity(new Intent(HomeActivity.this, CreateQuestionPaperActivity.class));
         });
     }
 
-            @Override
+    @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Unregister broadcast receiver
+
         if (profileUpdateReceiver != null) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(profileUpdateReceiver);
         }
@@ -178,7 +178,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             @Override
     protected void onResume() {
         super.onResume();
-        // Refresh the profile picture when returning to this activity
+
         loadUserProfileInNavHeader();
     }
 
@@ -187,25 +187,25 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         TextView tvNavUserName = headerView.findViewById(R.id.tvNavUserName);
         TextView tvNavUserEmail = headerView.findViewById(R.id.tvNavUserEmail);
         ShapeableImageView ivNavUserPhoto = headerView.findViewById(R.id.ivNavUserPhoto);
-        
-        // Ensure the ShapeableImageView has a circular shape
+
+
         ivNavUserPhoto.setShapeAppearanceModel(
             ShapeAppearanceModel.builder()
                 .setAllCornerSizes(ShapeAppearanceModel.PILL)
                 .build()
         );
-        
+
         String uid = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
         if (uid != null) {
-            // Load user email
+
             String email = mAuth.getCurrentUser().getEmail();
             if (email != null && !email.isEmpty()) {
                 tvNavUserEmail.setText(email);
             } else {
                 tvNavUserEmail.setText("ExamForge User");
             }
-            
-            // Load user name from Firebase
+
+
             FirebaseManager.getUserName(uid, new FirebaseManager.OnUserDataCallback() {
                 @Override
                 public void onUserNameLoaded(String name) {
@@ -218,8 +218,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                     Toast.makeText(HomeActivity.this, "Error loading user data", Toast.LENGTH_SHORT).show();
                 }
             });
-            
-            // Load profile picture from Room
+
+
             userRepository.getUserById(uid).observe(this, user -> {
                 if (user != null && user.getProfilePicPath() != null) {
                     File imageFile = new File(user.getProfilePicPath());
@@ -228,21 +228,21 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                             .load(imageFile)
                             .skipMemoryCache(true)
                             .diskCacheStrategy(DiskCacheStrategy.NONE)
-                            .circleCrop() // Apply circle crop transformation
+                            .circleCrop()
                             .placeholder(R.drawable.ic_launcher_foreground)
                             .error(R.drawable.ic_launcher_foreground)
                             .into(ivNavUserPhoto);
                     } else {
-                        // Set default icon if file doesn't exist
+
                         ivNavUserPhoto.setImageResource(R.drawable.ic_launcher_foreground);
                     }
                 } else {
-                    // Set default icon
+
                     ivNavUserPhoto.setImageResource(R.drawable.ic_launcher_foreground);
                 }
             });
         } else {
-            // Not logged in
+
             tvNavUserName.setText("Guest User");
             tvNavUserEmail.setText("Not logged in");
             ivNavUserPhoto.setImageResource(R.drawable.ic_launcher_foreground);
@@ -272,10 +272,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
             shareIntent.putExtra(Intent.EXTRA_SUBJECT, "ExamForge");
-            
+
             String shareMessage = "Check out ExamForge, an app to create and share question papers easily!\n\n";
             shareMessage = shareMessage + "https://play.google.com/store/search?q=examforge";
-            
+
             shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
             startActivity(Intent.createChooser(shareIntent, "Share via"));
         } catch (Exception e) {
@@ -283,7 +283,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    // RecyclerView Adapter for displaying history.
+
     private class QuestionPaperAdapter extends RecyclerView.Adapter<QuestionPaperAdapter.QuestionPaperViewHolder> {
         private List<QuestionPaper> questionPapers;
 
@@ -308,12 +308,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         public void onBindViewHolder(@NonNull QuestionPaperViewHolder holder, int position) {
             QuestionPaper paper = questionPapers.get(position);
             holder.tvTitle.setText(paper.getTitle());
-            
-            // Format the date as a readable string
+
+
             String date = DateFormat.format("MMM dd, yyyy", paper.getCreatedAt()).toString();
             holder.tvDate.setText(date);
-            
-            // Set click listener to open the PDF
+
+
             holder.itemView.setOnClickListener(v -> {
                 Intent intent = new Intent(HomeActivity.this, PreviewActivity.class);
                 intent.putExtra("filePath", paper.getFilePath());
@@ -344,7 +344,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             }
         }
     }
-    
+
     private void setupItemTouchHelper() {
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
@@ -366,72 +366,72 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
     }
-    
+
     private void setupThemeToggle() {
-        // Get current theme state
+
         isDarkMode = ThemeManager.getDarkModeState(this);
-        
-        // Find the theme toggle button in the toolbar
+
+
         ivThemeToggle = toolbar.findViewById(R.id.ivThemeToggle);
-        
-        // Ensure the toggle is visible and configured properly
+
+
         if (ivThemeToggle != null) {
             ivThemeToggle.setVisibility(View.VISIBLE);
-            
-            // Make sure the icon has the right tint color
+
+
             ivThemeToggle.setColorFilter(getResources().getColor(R.color.white, getTheme()));
-            
-            // Update icon based on current theme - this sets the correct icon
+
+
             updateThemeIcon();
-            
-            // Set click listener for theme toggle
+
+
             ivThemeToggle.setOnClickListener(v -> {
-                // Toggle theme
+
                 isDarkMode = ThemeManager.toggleDarkMode(this);
-                
-                // Update icon immediately
+
+
                 updateThemeIcon();
-                
-                // Show feedback to user
+
+
                 String message = isDarkMode ? "Dark mode enabled" : "Light mode enabled";
                 Toast.makeText(HomeActivity.this, message, Toast.LENGTH_SHORT).show();
-                
-                // Recreate activity to apply theme changes
+
+
                 recreate();
             });
         } else {
             Log.e(TAG, "Theme toggle button not found in toolbar");
         }
     }
-    
+
     private void updateThemeIcon() {
         if (ivThemeToggle != null) {
-            ivThemeToggle.setImageResource(isDarkMode 
-                ? R.drawable.ic_light_mode  // Show light mode icon when in dark mode
-                : R.drawable.ic_dark_mode); // Show dark mode icon when in light mode
-                
-            // Ensure visibility again
+            ivThemeToggle.setImageResource(isDarkMode
+                ? R.drawable.ic_light_mode
+                : R.drawable.ic_dark_mode);
+
+
             ivThemeToggle.setVisibility(View.VISIBLE);
         }
     }
 
     private void setupSearchView() {
-        // Configure search view appearance
+
         searchView.setMaxWidth(Integer.MAX_VALUE);
-        
-        // Make sure the search view is clickable and focusable
+
+
         searchView.setClickable(true);
         searchView.setFocusable(true);
         searchView.setFocusableInTouchMode(true);
-        
-        // Find the search text view to adjust its appearance
+
+
         View searchPlate = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
         if (searchPlate != null && searchPlate instanceof TextView) {
             TextView searchTextView = (TextView) searchPlate;
             searchTextView.setTextSize(14f);
         }
-        
-        // Set query listener
+
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -445,21 +445,21 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 return true;
             }
         });
-        
-        // Fix for clicking issue - use click listener
+
+
         View.OnClickListener clickListener = v -> {
             searchView.onActionViewExpanded();
             searchView.requestFocus();
         };
-        
-        // Attach the click listener to both the search view and its parent card
+
+
         searchView.setOnClickListener(clickListener);
         View searchCardView = findViewById(R.id.searchCardView);
         if (searchCardView != null) {
             searchCardView.setOnClickListener(clickListener);
         }
-        
-        // Add clear listener to reset to all papers
+
+
         searchView.setOnCloseListener(() -> {
             adapter.updateData(allQuestionPapers);
             recyclerView.setVisibility(View.VISIBLE);
@@ -467,36 +467,36 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             return false;
         });
     }
-    
+
     private void filterQuestionPapers(String query) {
         if (allQuestionPapers == null || allQuestionPapers.isEmpty()) {
             return;
         }
-        
+
         if (query == null || query.trim().isEmpty()) {
-            // If query is empty, show all papers
+
             adapter.updateData(allQuestionPapers);
             recyclerView.setVisibility(View.VISIBLE);
             noResultsContainer.setVisibility(View.GONE);
             return;
         }
-        
+
         String lowerCaseQuery = query.toLowerCase().trim();
         List<QuestionPaper> filteredList = new ArrayList<>();
-        
+
         for (QuestionPaper paper : allQuestionPapers) {
             if (paper.getTitle().toLowerCase().contains(lowerCaseQuery)) {
                 filteredList.add(paper);
             }
         }
-        
+
         if (filteredList.isEmpty()) {
-            // Show "no results" view with the query
+
             recyclerView.setVisibility(View.GONE);
             noResultsContainer.setVisibility(View.VISIBLE);
             tvNoResultsQuery.setText("No results found for \"" + query + "\"");
         } else {
-            // Update adapter with filtered data
+
             adapter.updateData(filteredList);
             recyclerView.setVisibility(View.VISIBLE);
             noResultsContainer.setVisibility(View.GONE);

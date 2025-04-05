@@ -10,9 +10,9 @@ public class QuestionPaper {
     private String title;
     private String filePath;
     private long createdAt;
-    private String userId;  // NEW FIELD: stores the uid of the user who generated the paper
+    private String userId;  
 
-    // Updated constructor to include userId
+    
     public QuestionPaper(String title, String filePath, long createdAt, String userId) {
         this.title = title;
         this.filePath = filePath;
@@ -20,7 +20,7 @@ public class QuestionPaper {
         this.userId = userId;
     }
 
-    // Getters and setters
+    
     public int getId() {
         return id;
     }

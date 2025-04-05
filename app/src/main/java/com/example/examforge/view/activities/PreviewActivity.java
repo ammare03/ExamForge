@@ -27,7 +27,7 @@ public class PreviewActivity extends AppCompatActivity {
         btnBackToHistory = findViewById(R.id.btnBackToHistory);
         tvPreviewLabel = findViewById(R.id.tvPreviewLabel);
         
-        // Get file path from intent extras
+
         pdfFilePath = getIntent().getStringExtra("filePath");
         pdfTitle = getIntent().getStringExtra("title");
         

@@ -38,7 +38,7 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Initialize PDFBox resources
+        
         PDFBoxResourceLoader.init(getApplicationContext());
         setContentView(R.layout.activity_create_question_paper);
 
@@ -50,7 +50,7 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
         etFileName = findViewById(R.id.etFileName);
         spinnerQuestionType = findViewById(R.id.spinnerQuestionType);
 
-        // Populate dropdown with question types
+        
         String[] questionTypes = {"MCQ", "Subjective", "Mixed"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
@@ -58,7 +58,7 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
                 questionTypes);
         spinnerQuestionType.setAdapter(adapter);
         
-        // Set default selection
+        
         spinnerQuestionType.setText(questionTypes[0], false);
 
         btnChoosePDF.setOnClickListener(v -> openFileChooser());
@@ -80,33 +80,33 @@ public class CreateQuestionPaperActivity extends AppCompatActivity {
                 return;
             }
 
-            // Get the file name entered by the user
+            
             String userFileName = etFileName.getText().toString().trim();
             if (userFileName.isEmpty()) {
-                userFileName = "GeneratedQuestionPaper"; // Default name if not provided
+                userFileName = "GeneratedQuestionPaper"; 
             }
-            userFileName = userFileName + ".pdf"; // Ensure the file name has a .pdf extension
+            userFileName = userFileName + ".pdf"; 
 
             Toast.makeText(CreateQuestionPaperActivity.this, "Generating question paper...", Toast.LENGTH_SHORT).show();
 
             ChatGPTManager chatGPTManager = new ChatGPTManager();
             String finalUserFileName = userFileName;
-            chatGPTManager.generateQuestionPaper(extractedText, 1000, marks, questionType, additionalParams, new ChatGPTManager.ChatGPTCallback() {
+            chatGPTManager.generateQuestionPaper(extractedText, 33000, marks, questionType, additionalParams, new ChatGPTManager.ChatGPTCallback() {
                 @Override
                 public void onComplete(String combinedResponse) {
                     String finalOutput = "Total Marks: " + marks + "\n\n" + combinedResponse;
                     runOnUiThread(() -> {
                         try {
                             File pdfFile = PDFGenerator.generatePDF(CreateQuestionPaperActivity.this, finalOutput, finalUserFileName);
-                            // Get current user's uid from FirebaseAuth
+                            
                             String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                            // Create QuestionPaper with the user's uid
+                            
                             QuestionPaper paper = new QuestionPaper(finalUserFileName, pdfFile.getAbsolutePath(), System.currentTimeMillis(), uid);
-                            // Insert into Room database
+                            
                             QuestionPaperHistoryRepository repository = new QuestionPaperHistoryRepository(CreateQuestionPaperActivity.this);
                             repository.insert(paper);
 
-                            // Navigate to PreviewActivity.
+                            
                             Intent intent = new Intent(CreateQuestionPaperActivity.this, PreviewActivity.class);
                             intent.putExtra("filePath", pdfFile.getAbsolutePath());
                             intent.putExtra("title", finalUserFileName);

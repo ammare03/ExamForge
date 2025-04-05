@@ -23,7 +23,7 @@ public interface UserDao {
     @Query("SELECT * FROM user_profiles WHERE userId = :userId")
     User getUserByIdSync(String userId);
     
-    // This query forces Room to refresh its cache for this user
+    
     @Query("SELECT * FROM user_profiles WHERE userId = :userId LIMIT 0")
     List<User> invalidateUserById(String userId);
 } 

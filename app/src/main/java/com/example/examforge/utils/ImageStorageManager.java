@@ -13,24 +13,24 @@ public class ImageStorageManager {
     private static final String TAG = "ImageStorageManager";
     private static final String PROFILE_IMAGES_DIR = "profile_images";
 
-    // Save image to internal storage and return the file path
+    
     public static String saveImageToInternalStorage(Context context, Uri imageUri, String userId) {
         if (imageUri == null) {
             return null;
         }
 
-        // Create directory for profile images if it doesn't exist
+        
         File directory = new File(context.getFilesDir(), PROFILE_IMAGES_DIR);
         if (!directory.exists()) {
             directory.mkdirs();
         }
 
-        // Create a unique filename with user ID
+        
         String filename = "profile_" + userId + ".jpg";
         File outputFile = new File(directory, filename);
 
         try {
-            // Copy image data from URI to internal storage file
+            
             try (InputStream inputStream = context.getContentResolver().openInputStream(imageUri);
                  FileOutputStream outputStream = new FileOutputStream(outputFile)) {
                 
@@ -38,7 +38,7 @@ public class ImageStorageManager {
                     return null;
                 }
                 
-                // Copy the image data
+                
                 byte[] buffer = new byte[4096];
                 int bytesRead;
                 while ((bytesRead = inputStream.read(buffer)) != -1) {
@@ -54,7 +54,7 @@ public class ImageStorageManager {
         }
     }
 
-    // Delete image from internal storage
+    
     public static boolean deleteImageFromInternalStorage(String imagePath) {
         if (imagePath == null || imagePath.isEmpty()) {
             return false;

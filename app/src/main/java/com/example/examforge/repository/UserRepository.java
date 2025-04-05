@@ -30,10 +30,10 @@ public class UserRepository {
         Log.d(TAG, "Updating user with ID: " + user.getUserId() + ", path: " + user.getProfilePicPath());
         executor.execute(() -> {
             userDao.update(user);
-            // Invalidate LiveData to force observers to refresh
+            
             try {
                 db.runInTransaction(() -> {
-                    // Just call the method to trigger a refresh, we don't need the result
+                    
                     userDao.invalidateUserById(user.getUserId());
                 });
                 Log.d(TAG, "Successfully invalidated cache for user: " + user.getUserId());
@@ -53,7 +53,7 @@ public class UserRepository {
         return userDao.getUserByIdSync(userId);
     }
 
-    // This method will run on background thread to get sync data
+    
     public interface UserCallback {
         void onUserLoaded(User user);
     }
